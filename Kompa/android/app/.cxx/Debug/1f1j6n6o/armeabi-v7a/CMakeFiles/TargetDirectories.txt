@@ -1,0 +1,2 @@
+C:/Users/34722/Desktop/TFG/Frontend/Kompa/android/app/.cxx/Debug/1f1j6n6o/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/34722/Desktop/TFG/Frontend/Kompa/android/app/.cxx/Debug/1f1j6n6o/armeabi-v7a/CMakeFiles/rebuild_cache.dir

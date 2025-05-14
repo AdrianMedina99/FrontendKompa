@@ -1,0 +1,61 @@
+name: kompa
+description: A new Flutter project.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  http: ^1.4.0
+  shared_preferences: ^2.2.0
+  intl_phone_field: ^3.2.0
+  flutter_otp_text_field: ^1.1.1
+  provider: ^6.1.1
+  get: ^4.6.6
+  table_calendar: ^3.0.9
+  intl: ^0.18.1
+  time_range_picker: ^2.2.0
+  google_maps_flutter: ^2.5.3
+  dotted_line: ^3.2.2
+  syncfusion_flutter_barcodes: ^24.1.44
+  book_my_seat: ^1.0.1
+  dotted_border: ^2.1.0
+  url_launcher: ^6.2.4
+  readmore: ^2.2.0
+  carousel_slider: ^5.0.0
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.16.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+  fonts:
+    - family: Ariom-Bold
+      fonts:
+        - asset: fonts/Ariom Bold.ttf
+    - family: Ariom-Regular
+      fonts:
+        - asset: fonts/Ariom Regular.ttf
+    - family: Ariom-RegularItalic
+      fonts:
+        - asset: fonts/Ariom RegularItalic.ttf
+    - family: Ariom-UltraBold
+      fonts:
+        - asset: fonts/Ariom UltraBold.ttf
+    - family: Ariom-UltraBoldItalic
+      fonts:
+        - asset: fonts/Ariom UltraBoldItalic.ttf
+    - family: Ariom-BoldItalic
+      fonts:
+        - asset: fonts/Ariom BoldItalic.ttf
