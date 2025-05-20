@@ -1,12 +1,13 @@
 // ignore_for_file: file_names
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kompa/Config/common.dart';
 import 'package:flutter/material.dart';
 import 'package:kompa/screen/Home/bottom.dart';
 import 'package:provider/provider.dart';
+import 'package:kompa/providers/AuthProvider.dart' as auth;
 
 import '../../dark_mode.dart';
-import '../../providers/AuthProvider.dart';
 import 'signUpScreen.dart';
 
 class Welcome extends StatefulWidget {
@@ -21,9 +22,8 @@ class _WelcomeState extends State<Welcome> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
-  bool _rememberMe = false; // Estado para el checkbox
+  bool _rememberMe = false;
 
-  // Variables de estado
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -33,9 +33,8 @@ class _WelcomeState extends State<Welcome> {
     _checkRememberMe();
   }
 
-  // Verificar si "Recordar contraseña" está activado
   Future<void> _checkRememberMe() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = Provider.of<auth.AuthProvider>(context, listen: false);
     if (authProvider.rememberMe && authProvider.isAuthenticated) {
       Navigator.pushReplacement(
         context,
@@ -51,7 +50,6 @@ class _WelcomeState extends State<Welcome> {
     super.dispose();
   }
 
-  // Método para manejar el inicio de sesión
   Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
@@ -68,15 +66,13 @@ class _WelcomeState extends State<Welcome> {
       _errorMessage = null;
     });
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = Provider.of<auth.AuthProvider>(context, listen: false);
 
     try {
-      // Establecer rememberMe antes de login para que se guarden correctamente los datos
       await authProvider.setRememberMe(_rememberMe);
       final success = await authProvider.login(email: email, password: password);
 
       if (success && mounted) {
-        // Asegurar que se guarden los datos con el valor de rememberMe
         await authProvider.setRememberMe(_rememberMe);
 
         Navigator.pushReplacement(
@@ -110,7 +106,6 @@ class _WelcomeState extends State<Welcome> {
       backgroundColor: notifier.backGround,
       body: Stack(
         children: [
-          // Imagen de fondo que ocupa toda la pantalla
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -119,7 +114,6 @@ class _WelcomeState extends State<Welcome> {
               fit: BoxFit.cover,
             ),
           ),
-          // Contenido sobre la imagen
           SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -143,7 +137,7 @@ class _WelcomeState extends State<Welcome> {
                           "Bienvenido a",
                           style: TextStyle(
                             fontSize: 40,
-                            color: Colors.white, // Color fijo para mejor contraste
+                            color: Colors.white,
                             fontFamily: "Ariom-Bold",
                           ),
                         ),
@@ -290,13 +284,13 @@ class _WelcomeState extends State<Welcome> {
                         child: _isLoading
                             ? const CircularProgressIndicator(color: Colors.white)
                             : Text(
-                                "Iniciar sesión",
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  color: notifier.buttonTextColor,
-                                  fontFamily: "Ariom-Bold",
-                                ),
-                              ),
+                          "Iniciar sesión",
+                          style: TextStyle(
+                            fontSize: 24,
+                            color: notifier.buttonTextColor,
+                            fontFamily: "Ariom-Bold",
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -310,49 +304,6 @@ class _WelcomeState extends State<Welcome> {
                       ),
                     ),
                   ],
-                  AppConstants.Height(height / 30),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const BottomBarScreen(),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      height: height / 13,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: notifier.textColor,
-                        ),
-                        color: notifier.textFieldBackground,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              "assets/Google Logo.png",
-                              scale: 2,
-                              color: notifier.textColor,
-                            ),
-                            AppConstants.Width(width / 35),
-                            Text(
-                              "Continuar con Google",
-                              style: TextStyle(
-                                fontSize: 17,
-                                color: notifier.textColor,
-                                fontFamily: "Ariom-Bold",
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
                   AppConstants.Height(height / 30),
                   Center(
                     child: InkWell(

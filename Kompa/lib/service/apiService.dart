@@ -195,7 +195,9 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final data = jsonDecode(response.body);
+      print("Datos del cliente obtenidos: $data");
+      return data;
     } else {
       throw Exception('Error al obtener usuario cliente: ${response.body}');
     }
@@ -243,7 +245,4 @@ class ApiService {
       throw Exception('Error al eliminar usuario cliente: ${response.body}');
     }
   }
-
-
-
 }

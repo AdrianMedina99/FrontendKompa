@@ -1,13 +1,16 @@
-// ignore_for_file: file_names, camel_case_types
-
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../Config/common.dart';
 import '../../dark_mode.dart';
+import '../../providers/AuthProvider.dart';
 import '../Home/bottom.dart';
 
 class Edit_Profile extends StatefulWidget {
-  const Edit_Profile({super.key});
+  final String userType; // CLIENT o BUSINESS
+
+  const Edit_Profile({super.key, required this.userType});
 
   @override
   State<Edit_Profile> createState() => _Edit_ProfileState();
@@ -15,15 +18,89 @@ class Edit_Profile extends StatefulWidget {
 
 class _Edit_ProfileState extends State<Edit_Profile> {
   ColorNotifire notifier = ColorNotifire();
+  Map<String, dynamic>? userData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final data = await authProvider.getCurrentUserData();
+
+      if (data.isNotEmpty) {
+        setState(() {
+          userData = data;
+          _nameController.text = data['nombre'] ?? '';
+          _lastNameController.text = data['apellidos'] ?? '';
+          _phoneController.text = data['phone'] ?? '';
+          _descriptionController.text = data['description'] ?? '';
+          _dniController.text = data['dni'] ?? '';
+          _selectedValue = data['gender'] ?? '';
+          _dateController.text = _getFormattedBirthDate(data['birthDate']) ?? '';
+          _websiteController.text = data['website'] ?? '';
+        });
+      }
+    } catch (e) {
+      print('Error al cargar los datos del usuario: $e');
+    }
+  }
+
+  String? _getFormattedBirthDate(dynamic birthDate) {
+    if (birthDate == null) return null;
+    try {
+      DateTime date;
+      if (birthDate is Map && birthDate.containsKey('seconds')) {
+        final seconds = birthDate['seconds'] as int;
+        date = DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true).add(const Duration(hours: 2));
+      } else if (birthDate is String) {
+        date = DateTime.parse(birthDate).toLocal();
+      } else {
+        return null;
+      }
+      return DateFormat('dd/MM/yyyy').format(date);
+    } catch (e) {
+      print('Error al formatear birthDate: $e');
+      return null;
+    }
+  }
+
+
+
+  // Declaración de los controladores de texto
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _dniController = TextEditingController();
+  final TextEditingController _websiteController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Liberar los controladores
+    _nameController.dispose();
+    _lastNameController.dispose();
+    _phoneController.dispose();
+    _descriptionController.dispose();
+    _dniController.dispose();
+    _dateController.dispose();
+    _websiteController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     notifier = Provider.of<ColorNotifire>(context, listen: true);
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: notifier.backGround,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: notifier.backGround,
@@ -39,7 +116,7 @@ class _Edit_ProfileState extends State<Edit_Profile> {
           ),
         ),
         title: Text(
-          "Edit Profile",
+          "Editar perfil",
           style: TextStyle(
             color: notifier.textColor,
             fontSize: 22,
@@ -47,134 +124,92 @@ class _Edit_ProfileState extends State<Edit_Profile> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 10, right: 10),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppConstants.Height(height / 30),
             Center(
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    height: height / 5,
-                    width: width / 2.5,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(25),
-                      child: Image.asset(
-                        "assets/Profile.jpeg",
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: -15,
-                    child: Container(
-                      height: height / 17,
-                      width: width / 5,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xffB6B6C0),
-                      ),
-                      child: Image.asset(
-                        "assets/Edit.png",
-                        scale: 2.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            AppConstants.Height(height / 30),
-            Text(
-              "Your phone number",
-              style: TextStyle(
-                color: notifier.textColor,
-                fontSize: 20,
-                fontFamily: "Ariom-Bold",
-              ),
-            ),
-            AppConstants.Height(height / 30),
-            Container(
-              alignment: Alignment.center,
-              height: height / 13,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(
-                  color: notifier.textColor,
+              child: Container(
+                height: height / 7,
+                width: width / 3,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ),
-              child: TextField(
-                keyboardType: TextInputType.number,
-                textAlignVertical: TextAlignVertical.bottom,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  prefixIcon: Image.asset(
-                    "assets/Call.png",
-                    scale: 3,
-                    color: notifier.textColor,
-                  ),
-                  hintText: "0123 456 789",
-                  hintStyle: TextStyle(
-                    color: notifier.textColor,
-                    fontSize: 14,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset(
+                    "assets/Profile.jpeg",
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
             ),
-            AppConstants.Height(height / 30),
-            Text(
-              "Name",
-              style: TextStyle(
-                color: notifier.textColor,
-                fontSize: 20,
-                fontFamily: "Ariom-Bold",
-              ),
-            ),
-            AppConstants.Height(height / 30),
-            Container(
-              alignment: Alignment.center,
-              height: height / 13,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(
-                  color: notifier.textColor,
-                ),
-              ),
-              child: TextField(
-                textAlignVertical: TextAlignVertical.bottom,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  prefixIcon: Image.asset(
-                    "assets/Profile Bottom.png",
-                    scale: 3,
-                    color: notifier.textColor,
-                  ),
-                  hintText: "Andrew",
-                  hintStyle: TextStyle(
-                    color: notifier.textColor,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
+            SizedBox(height: height / 40),
+            widget.userType == "CLIENT"
+                ? _buildClientFields(height, width)
+                : _buildBusinessFields(height, width),
           ],
         ),
       ),
       bottomNavigationBar: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const BottomBarScreen(),
-            ),
-          );
-        },
+          onTap: () async {
+            final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+            try {
+              if (_nameController.text.isEmpty || _phoneController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Por favor, complete todos los campos obligatorios")),
+                );
+                return;
+              }
+
+              Map<String, dynamic> updatedData;
+
+              if (widget.userType == "CLIENT") {
+                final parsedDate = DateFormat('dd/MM/yyyy').parse(_dateController.text);
+                final formattedDate = parsedDate.toUtc().toIso8601String();
+                updatedData = {
+                  ...userData!,
+                  'nombre': _nameController.text,
+                  'apellidos': _lastNameController.text,
+                  'phone': int.tryParse(_phoneController.text) ?? _phoneController.text,
+                  'description': _descriptionController.text,
+                  'dni': _dniController.text,
+                  'gender': _selectedValue,
+                  'birthDate': formattedDate,
+                };
+              } else if (widget.userType == "BUSINESS") {
+                updatedData = {
+                  ...userData!,
+                  'nombre': _nameController.text,
+                  'phone': int.tryParse(_phoneController.text) ?? _phoneController.text,
+                  'description': _descriptionController.text,
+                  'website': _websiteController.text,
+                };
+              } else {
+                throw Exception("Tipo de usuario desconocido");
+              }
+
+              await authProvider.updateUserData(updatedData);
+              await authProvider.getCurrentUserData(); // <-- Refresca los datos
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Datos actualizados correctamente")),
+              );
+
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const BottomBarScreen()),
+                    (route) => false,
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Error al actualizar los datos: $e")),
+              );
+            }
+          },
+
         child: Container(
           height: height / 11,
           width: double.infinity,
@@ -187,16 +222,299 @@ class _Edit_ProfileState extends State<Edit_Profile> {
           ),
           child: const Center(
             child: Text(
-              "Save changes",
+              "Guardar Cambios",
               style: TextStyle(
-                fontSize: 20,
-                fontFamily: "Ariom-Bold",
                 color: Color(0xff131313),
+                fontSize: 18,
+                fontFamily: "Ariom-Bold",
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildClientFields(double height, double width) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildTextField(
+          "Nombre",
+          userData?['nombre'] ?? "Su nombre",
+          SvgPicture.asset(
+            "assets/Name.svg",
+            color: notifier.textColor,
+            height: 24,
+            width: 24,
+          ),
+          controller: _nameController,
+        ),
+        AppConstants.Height(height / 30),
+        _buildTextField(
+          "Apellidos",
+          userData?['apellidos'] ?? "Sus apellidos",
+          SvgPicture.asset(
+            "assets/Name.svg",
+            color: notifier.textColor,
+            height: 24,
+            width: 24,
+          ),
+          controller: _lastNameController,
+        ),
+        AppConstants.Height(height / 30),
+        _buildTextField(
+          "Telefono",
+          userData?['phone'] ?? "Su teléfono",
+          SvgPicture.asset(
+            "assets/Call.svg",
+            color: notifier.textColor,
+            height: 24,
+            width: 24,
+          ),
+          controller: _phoneController,
+        ),
+        AppConstants.Height(height / 30),
+        _buildTextField(
+          "Descripción",
+          userData?['description'] ?? "Ingrese una breve descripción",
+          SvgPicture.asset(
+            "assets/Description.svg",
+            color: notifier.textColor,
+            height: 24,
+            width: 24,
+          ),
+          controller: _descriptionController,
+        ),
+        AppConstants.Height(height / 30),
+        _buildTextField(
+          "DNI",
+          userData?['dni'] ?? "Su DNI",
+          SvgPicture.asset(
+            "assets/DNI.svg",
+            color: notifier.textColor,
+            height: 24,
+            width: 24,
+          ),
+          controller: _dniController,
+        ),
+        AppConstants.Height(height / 30),
+        _buildTextField(
+          "Fecha de nacimiento",
+          _getFormattedBirthDate(userData?['birthDate']) ?? "Seleccione su fecha de nacimiento",
+          SvgPicture.asset(
+            "assets/Calendar.svg",
+            color: notifier.textColor,
+            height: 24,
+            width: 24,
+          ),
+          controller: _dateController,
+          isReadOnly: true,
+          onTap: () => _selectDate(context),
+        ),
+        AppConstants.Height(height / 30),
+        Text(
+          "Género",
+          style: TextStyle(
+            color: notifier.textColor,
+            fontSize: 20,
+            fontFamily: "Ariom-Bold",
+          ),
+        ),
+        AppConstants.Height(height / 30),
+        _buildDropdownField(
+          items: const ["Masculino", "Femenino", "Otro", "Prefiero no decirlo"],
+          hintText: "Selecciona tu género",
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBusinessFields(double height, double width) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildTextField(
+          "Nombre de la empresa",
+          userData?['nombre'] ?? "Su empresa",
+          SvgPicture.asset(
+            "assets/Business.svg",
+            color: notifier.textColor,
+            height: 24,
+            width: 24,
+          ),
+          controller: _nameController,
+        ),
+        AppConstants.Height(height / 30),
+        _buildTextField(
+          "Teléfono",
+          userData?['phone'] ?? "Su teléfono",
+          SvgPicture.asset(
+            "assets/Call.svg",
+            color: notifier.textColor,
+            height: 24,
+            width: 24,
+          ),
+          controller: _phoneController,
+        ),
+        AppConstants.Height(height / 30),
+        _buildTextField(
+          "Sitio web",
+          userData?['website'] ?? "Su sitio web",
+          SvgPicture.asset(
+            "assets/Web.svg",
+            color: notifier.textColor,
+            height: 24,
+            width: 24,
+          ),
+          controller: _websiteController,
+        ),
+        AppConstants.Height(height / 30),
+        _buildTextField(
+          "Descripción",
+          userData?['description'] ?? "Descripción de la empresa",
+          SvgPicture.asset(
+            "assets/Description.svg",
+            color: notifier.textColor,
+            height: 24,
+            width: 24,
+          ),
+          controller: _descriptionController,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField(String label, String hint, Widget icon, {bool isNumber = false, int maxLines = 1, TextEditingController? controller, bool isReadOnly = false, VoidCallback? onTap}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: notifier.textColor,
+            fontSize: 20,
+            fontFamily: "Ariom-Bold",
+          ),
+        ),
+        AppConstants.Height(10),
+        Container(
+          alignment: Alignment.center,
+          height: maxLines > 1 ? null : MediaQuery.of(context).size.height / 13,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(
+              color: notifier.textColor,
+            ),
+          ),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 12.0, right: 8.0, bottom: 2),
+                child: icon,
+              ),
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  readOnly: isReadOnly,
+                  onTap: onTap,
+                  keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+                  maxLines: maxLines,
+                  style: TextStyle(
+                    color: notifier.textColor,
+                    fontSize: 14,
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: hint,
+                    hintStyle: TextStyle(
+                      color: notifier.textColor,
+                      fontSize: 14,
+                    ),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.only(left: 10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String? _selectedValue;
+  Widget _buildDropdownField({required List<String> items, required String hintText}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: notifier.textColor,
+        ),
+      ),
+      child: DropdownButtonFormField<String>(
+        value: _selectedValue != '' ? _selectedValue : null, // <-- Aquí
+        decoration: const InputDecoration(
+          border: InputBorder.none,
+        ),
+        hint: Text(
+          hintText,
+          style: TextStyle(
+            color: notifier.textColor,
+            fontFamily: "Ariom-Regular",
+          ),
+        ),
+        dropdownColor: notifier.backGround,
+        style: TextStyle(
+          color: notifier.textColor,
+          fontFamily: "Ariom-Regular",
+        ),
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: notifier.textColor,
+        ),
+        isExpanded: true,
+        items: items.map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        onChanged: (newValue) {
+          setState(() {
+            _selectedValue = newValue;
+          });
+        },
+      ),
+    );
+  }
+
+  void _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().subtract(const Duration(days: 6570)), // ~18 años
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: const Color(0xffD1E50C),
+              onPrimary: Colors.black,
+              surface: notifier.backGround,
+              onSurface: notifier.textColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _dateController.text = DateFormat('dd/MM/yyyy').format(picked);
+      });
+    }
   }
 }

@@ -2,6 +2,7 @@
 import 'package:kompa/Config/common.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../providers/AuthProvider.dart';
 import '../Home/event_detail.dart';
 import '../Home/setting.dart';
 import '../Profile/share_profile.dart';
@@ -49,6 +50,24 @@ class _profileState extends State<profile> {
     },
   ];
   ColorNotifire notifier = ColorNotifire();
+  String? _userName;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() async {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.getCurrentUserData().then((userData) {
+        setState(() {
+          _userName = userData['nombreCompleto'] ?? userData['nombre'] ?? "Usuario";
+        });
+      }).catchError((error) {
+        setState(() {
+          _userName = "Usuario";
+        });
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +81,7 @@ class _profileState extends State<profile> {
         backgroundColor: notifier.backGround,
         automaticallyImplyLeading: false,
         title: Text(
-          "Profile",
+          "Perfil",
           style: TextStyle(
             color: notifier.textColor,
             fontSize: 20,
@@ -117,7 +136,7 @@ class _profileState extends State<profile> {
               AppConstants.Height(height / 40),
               Center(
                 child: Text(
-                  "Rio",
+                  _userName ?? "Usuario",
                   style: TextStyle(
                     fontSize: 19,
                     color: notifier.textColor,
@@ -135,10 +154,13 @@ class _profileState extends State<profile> {
                   children: [
                     InkWell(
                       onTap: () {
+                        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                        final userType = authProvider.userType ?? "CLIENT";
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const Edit_Profile(),
+                            builder: (context) => Edit_Profile(userType: userType),
                           ),
                         );
                       },
@@ -201,7 +223,7 @@ class _profileState extends State<profile> {
               ),
               AppConstants.Height(height / 30),
               Text(
-                "Event Attended",
+                "Eventos Asistidos",
                 style: TextStyle(
                   fontSize: 32,
                   color: notifier.textColor,
@@ -303,3 +325,4 @@ class _profileState extends State<profile> {
     );
   }
 }
+

@@ -13,11 +13,13 @@ void main() async {
   await SharedPreferences.getInstance();
   runApp(const MyApp());
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    const apiBaseUrl = 'https://e32a-2a0c-5a80-2305-f700-6da8-b61b-4ffe-c2e2.ngrok-free.app';
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -25,7 +27,7 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => AuthProvider(
-            apiBaseUrl: 'https://159b-2a0c-5a80-2305-f700-f58f-9e13-a9a2-93b0.ngrok-free.app',
+            apiBaseUrl: apiBaseUrl,
           ),
         ),
       ],
@@ -89,4 +91,3 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
     );
   }
 }
-

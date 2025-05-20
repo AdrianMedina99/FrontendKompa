@@ -8,7 +8,6 @@ import '../../providers/AuthProvider.dart';
 import '../profile/list_friend.dart';
 import '../profile/payment_card.dart';
 import '../profile/wishlist.dart';
-import '../sign_in/new_password.dart';
 import '../voucher/voucher.dart';
 import '../sign_in/loginScreen.dart';
 
@@ -44,7 +43,7 @@ class _SettingState extends State<Setting> {
           ),
         ),
         title: Text(
-          "Setting",
+          "Configuracion",
           style: TextStyle(
             color: notifier.textColor,
             fontSize: 22,
@@ -55,6 +54,22 @@ class _SettingState extends State<Setting> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          ListTile(
+            leading: Text(
+              "Modo Oscuro",
+              style: TextStyle(
+                color: notifier.textColor,
+                fontSize: 17,
+                fontFamily: "Ariom-Bold",
+              ),
+            ),
+            trailing: Switch(
+              value: notifier.isDark,
+              onChanged: (bool value) {
+                notifier.isavalable(value);
+              },
+            ),
+          ),
           InkWell(
             onTap: () {
               Navigator.push(
@@ -66,7 +81,7 @@ class _SettingState extends State<Setting> {
             },
             child: accountDetails(
               image: "assets/Profile Bottom.png",
-              name: "List Friend",
+              name: "Lista de Amigos",
               icon: "assets/arrow-right.png",
               onPress: () {},
             ),
@@ -82,7 +97,7 @@ class _SettingState extends State<Setting> {
             },
             child: accountDetails(
               image: "assets/Voucher.png",
-              name: "Voucher",
+              name: "Ticket",
               icon: "assets/arrow-right.png",
               onPress: () {},
             ),
@@ -98,7 +113,7 @@ class _SettingState extends State<Setting> {
             },
             child: accountDetails(
               image: "assets/card.png",
-              name: "Payment Card",
+              name: "Metodo de Pago",
               icon: "assets/arrow-right.png",
               onPress: () {},
             ),
@@ -120,40 +135,8 @@ class _SettingState extends State<Setting> {
             ),
           ),
           InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const New_password(),
-                ),
-              );
-            },
-            child: accountDetails(
-              image: "assets/Lock.png",
-              name: "Change Password",
-              icon: "assets/arrow-right.png",
-              onPress: () {},
-            ),
-          ),
-          ListTile(
-            leading: Text(
-              "Dark Mode",
-              style: TextStyle(
-                color: notifier.textColor,
-                fontSize: 17,
-                fontFamily: "Ariom-Bold",
-              ),
-            ),
-            trailing: Switch(
-              value: notifier.isDark,
-              onChanged: (bool value) {
-                notifier.isavalable(value);
-              },
-            ),
-          ),
-          InkWell(
             onTap: () async {
-              await authProvider.logout(); // Llamar al método logout
+              await authProvider.logout();
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const Welcome()),
@@ -167,7 +150,7 @@ class _SettingState extends State<Setting> {
                 color: notifier.textColor,
               ),
               title: Text(
-                "Log out",
+                "Cerrar Sesion",
                 style: TextStyle(
                   fontFamily: "Ariom-Bold",
                   fontSize: 17,
