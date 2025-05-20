@@ -4,12 +4,15 @@ import 'package:kompa/Config/common.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../dark_mode.dart';
+import '../../providers/AuthProvider.dart';
 import 'all.dart';
 import 'concert.dart';
 import 'notification.dart';
 import 'search.dart';
 import 'sport.dart';
 import 'theatre.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -19,8 +22,70 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
+  String? _cityName;
+  String? _userName;
   int currentIndex = 0;
   ColorNotifire notifier = ColorNotifire();
+
+  @override
+  void initState() {
+    super.initState();
+    _getLocation();
+    Future.microtask(() async {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.getCurrentUserData().then((userData) {
+        setState(() {
+          _userName = userData['nombre'] ?? "Usuario";
+        });
+      }).catchError((error) {
+        setState(() {
+          _userName = "Usuario";
+        });
+      });
+    });
+  }
+
+  Future<void> _getLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      setState(() {
+        _cityName = "Ubicación desactivada";
+      });
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        setState(() {
+          _cityName = "Permiso denegado";
+        });
+        return;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      setState(() {
+        _cityName = "Permiso denegado permanentemente";
+      });
+      return;
+    }
+
+    try {
+      Position position = await Geolocator.getCurrentPosition();
+      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      if (placemarks.isNotEmpty) {
+        setState(() {
+          _cityName = placemarks.first.locality ?? "Ubicación desconocida";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _cityName = "Error obteniendo ubicación";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     notifier = Provider.of<ColorNotifire>(context, listen: true);
@@ -47,7 +112,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Hi, Alex",
+                  "Hola, ${_userName ?? "Usuario"}",
                   style: TextStyle(
                     color: notifier.textColor,
                     fontFamily: "Ariom-Bold",
@@ -62,7 +127,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     ),
                     AppConstants.Width(width / 50),
                     Text(
-                      "New York",
+                      _cityName ?? "Cargando...",
                       style: TextStyle(
                         color: notifier.subtitleTextColor,
                         fontSize: 14,
