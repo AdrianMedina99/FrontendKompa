@@ -176,7 +176,7 @@ class _profileState extends State<profile> {
                         ),
                         child: Center(
                           child: Text(
-                            "Edit",
+                            "Editar Perfil",
                             style: TextStyle(
                               color: notifier.textColor,
                               fontSize: 15,
@@ -208,7 +208,7 @@ class _profileState extends State<profile> {
                         ),
                         child: Center(
                           child: Text(
-                            "Share",
+                            "Compartir Perfil",
                             style: TextStyle(
                               color: notifier.textColor,
                               fontSize: 15,

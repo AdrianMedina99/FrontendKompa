@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:readmore/readmore.dart';
 import '../../Config/common.dart';
 import '../../dark_mode.dart';
+import '../category/ticket_book.dart';
 import '../message/add_friend.dart';
-import '../tickets/ticket_book.dart';
 import 'event_organizer.dart';
 import 'list_friends.dart';
 

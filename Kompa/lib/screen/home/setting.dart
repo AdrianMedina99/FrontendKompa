@@ -91,22 +91,6 @@ class _SettingState extends State<Setting> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const Voucher(),
-                ),
-              );
-            },
-            child: accountDetails(
-              image: "assets/Voucher.png",
-              name: "Ticket",
-              icon: "assets/arrow-right.png",
-              onPress: () {},
-            ),
-          ),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
                   builder: (context) => const Payment_card(),
                 ),
               );
@@ -129,7 +113,7 @@ class _SettingState extends State<Setting> {
             },
             child: accountDetails(
               image: "assets/Heart.png",
-              name: "Wishlist",
+              name: "Lista de Deseos",
               icon: "assets/arrow-right.png",
               onPress: () {},
             ),

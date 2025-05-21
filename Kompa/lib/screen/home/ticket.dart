@@ -8,7 +8,7 @@ import 'package:syncfusion_flutter_barcodes/barcodes.dart';
 
 import '../../Config/common.dart';
 import '../../dark_mode.dart';
-import '../tickets/ticket_detail.dart';
+import '../category/ticket_detail.dart';
 import 'bottom.dart';
 
 class ticket extends StatefulWidget {

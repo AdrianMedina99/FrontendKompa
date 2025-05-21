@@ -169,12 +169,12 @@ class _SearchState extends State<Search> {
       child: SizedBox(
         width: double.maxFinite,
         height: 120,
+        // Dentro de Event1
         child: Row(
           children: [
             Container(
               height: 120,
               width: MediaQuery.of(context).size.width * 0.25,
-              // color: Colors.red,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
                 image: DecorationImage(
@@ -182,46 +182,47 @@ class _SearchState extends State<Search> {
               ),
             ),
             SizedBox(width: 8),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.65,
-              height: 90,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontFamily: "Ariom-Bold",
-                      color: notifier.textColor,
+            Expanded( // <-- Cambia SizedBox por Expanded
+              child: SizedBox(
+                height: 90,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      name,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontFamily: "Ariom-Bold",
+                        color: notifier.textColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        time,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: notifier.subtitleTextColor,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          time,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: notifier.subtitleTextColor,
+                          ),
                         ),
-                      ),
-                      // SizedBox(width: MediaQuery.of(context).size.width / 6),
-                      Spacer(),
-                      Text(
-                        location,
-                        style: TextStyle(
-                          color: notifier.subtitleTextColor,
-                          fontSize: 12,
+                        Spacer(),
+                        Text(
+                          location,
+                          style: TextStyle(
+                            color: notifier.subtitleTextColor,
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

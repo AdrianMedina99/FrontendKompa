@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../dark_mode.dart';
+import '../category/CategoryScreen.dart';
 import '../profile/profile.dart';
-import '../tickets/ticket.dart';
 import 'home.dart';
 import 'message.dart';
 
@@ -20,7 +20,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
   ColorNotifire notifier = ColorNotifire();
   List<Widget> myChildren = [
     const Home(),
-    const ticket(),
+    const CategoryScreen(),
     const message(),
     const profile(),
   ];
@@ -37,8 +37,8 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
           top: Radius.circular(25),
         ),
         child: BottomNavigationBar(
-          selectedFontSize: 10,
-          unselectedFontSize: 10,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
           selectedItemColor: notifier.isDark
               ? const Color(0xff131313)
               : const Color(0xffD1E50C),
@@ -76,13 +76,13 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
                       : const Color(0xffD1E50C),
                 ),
               ),
-              label: "Home",
+              label: "Inicio",
             ),
             BottomNavigationBarItem(
               icon: Padding(
                 padding: const EdgeInsets.only(bottom: 7),
                 child: Image.asset(
-                  "assets/Ticket.png",
+                  "assets/category.png",
                   color: notifier.onBoard,
                   height: height / 27,
                 ),
@@ -90,14 +90,14 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
               activeIcon: Padding(
                 padding: const EdgeInsets.only(bottom: 7),
                 child: Image.asset(
-                  "assets/Ticket.png",
+                  "assets/category.png",
                   height: height / 27,
                   color: notifier.isDark
                       ? const Color(0xff131313)
                       : const Color(0xffD1E50C),
                 ),
               ),
-              label: "Ticket",
+              label: "Categorias",
             ),
             BottomNavigationBarItem(
               icon: Padding(
@@ -118,7 +118,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
                   height: height / 30,
                 ),
               ),
-              label: "Message",
+              label: "Quedadas",
             ),
             BottomNavigationBarItem(
               icon: Padding(
@@ -139,7 +139,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
                       : const Color(0xffD1E50C),
                 ),
               ),
-              label: "Profile",
+              label: "Perfil",
             ),
           ],
         ),

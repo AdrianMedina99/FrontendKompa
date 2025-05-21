@@ -37,7 +37,7 @@ class _Share_profileState extends State<Share_profile> {
           ),
         ),
         title: Text(
-          "Share Profile",
+          "Compartir perfil",
           style: TextStyle(
             color: notifier.textColor,
             fontSize: 22,
@@ -59,7 +59,7 @@ class _Share_profileState extends State<Share_profile> {
             ),
           ),
           Text(
-            "Send code to your friends to make friends.",
+            "Envia tu codigo de amigo.",
             style: TextStyle(
               fontSize: 15,
               color: notifier.textColor,
