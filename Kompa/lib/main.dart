@@ -1,11 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:kompa/providers/CategoryProvider.dart';
 import 'package:kompa/screen/Home/bottom.dart';
 import 'package:kompa/screen/onboarding_screen/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'dark_mode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/AuthProvider.dart';
+import 'service/apiService.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +21,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const apiBaseUrl = 'https://e32a-2a0c-5a80-2305-f700-6da8-b61b-4ffe-c2e2.ngrok-free.app';
+    const apiBaseUrl = 'https://83ef-2a0c-5a80-2305-f700-a860-ca12-f2eb-5dd1.ngrok-free.app';
+    final apiService = ApiService(baseUrl: apiBaseUrl);
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -28,6 +32,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => AuthProvider(
             apiBaseUrl: apiBaseUrl,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => CategoryProvider(
+            apiService: apiService,
           ),
         ),
       ],

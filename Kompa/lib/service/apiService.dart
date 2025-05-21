@@ -245,4 +245,72 @@ class ApiService {
       throw Exception('Error al eliminar usuario cliente: ${response.body}');
     }
   }
+
+  // Dentro de ApiService
+
+// Obtener todas las categorías
+  Future<List<dynamic>> getAllCategories() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/categories'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener categorías: ${response.body}');
+    }
+  }
+
+// Obtener una categoría por ID
+  Future<Map<String, dynamic>> getCategoryById(String id) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/categories/$id'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener la categoría: ${response.body}');
+    }
+  }
+
+// Crear una categoría
+  Future<Map<String, dynamic>> createCategory(Map<String, dynamic> categoryData) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/categories'),
+      headers: _getHeaders(),
+      body: jsonEncode(categoryData),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al crear la categoría: ${response.body}');
+    }
+  }
+
+// Actualizar una categoría
+  Future<Map<String, dynamic>> updateCategory(String id, Map<String, dynamic> categoryData) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/api/categories/$id'),
+      headers: _getHeaders(),
+      body: jsonEncode(categoryData),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al actualizar la categoría: ${response.body}');
+    }
+  }
+
+// Eliminar una categoría
+  Future<void> deleteCategory(String id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/api/categories/$id'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode != 204) {
+      throw Exception('Error al eliminar la categoría: ${response.body}');
+    }
+  }
+
 }

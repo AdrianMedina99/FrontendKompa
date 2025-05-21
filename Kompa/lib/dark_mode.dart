@@ -23,6 +23,7 @@ class ColorNotifire with ChangeNotifier {
 
   get hintTextColor => isDark ? const Color(0xffB6B6C0) : Colors.black54;
   get iconColor => isDark ? const Color(0xffB6B6C0) : Colors.black54;
+  get svgColor => const Color(0xFF000000);
   get buttonColor => const Color(0xffD1E50C);
   get buttonTextColor => const Color(0xff131313);
 
