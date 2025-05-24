@@ -313,4 +313,85 @@ class ApiService {
     }
   }
 
+  // Dentro de ApiService
+// Gestión de eventos
+
+// Obtener todos los eventos
+  Future<List<dynamic>> getAllEvents() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/events'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener eventos: ${response.body}');
+    }
+  }
+
+// Obtener un evento por ID
+  Future<Map<String, dynamic>> getEventById(String id) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/events/$id'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener el evento: ${response.body}');
+    }
+  }
+
+// Crear un evento
+  Future<Map<String, dynamic>> createEvent(Map<String, dynamic> eventData) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/events'),
+      headers: _getHeaders(),
+      body: jsonEncode(eventData),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al crear el evento: ${response.body}');
+    }
+  }
+
+// Actualizar un evento
+  Future<Map<String, dynamic>> updateEvent(String id, Map<String, dynamic> eventData) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/api/events/$id'),
+      headers: _getHeaders(),
+      body: jsonEncode(eventData),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al actualizar el evento: ${response.body}');
+    }
+  }
+
+// Eliminar un evento
+  Future<void> deleteEvent(String id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/api/events/$id'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode != 204) {
+      throw Exception('Error al eliminar el evento: ${response.body}');
+    }
+  }
+
+// Obtener eventos cercanos a una ubicación
+  Future<List<dynamic>> getEventsNearby(double lat, double lng, {int maxResults = 10}) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/events/nearby?lat=$lat&lng=$lng&maxResults=$maxResults'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener eventos cercanos: ${response.body}');
+    }
+  }
+
 }

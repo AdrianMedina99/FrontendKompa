@@ -24,6 +24,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final notifier = Provider.of<ColorNotifire>(context);
     final categoryProvider = Provider.of<CategoryProvider>(context);

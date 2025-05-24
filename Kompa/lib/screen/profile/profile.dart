@@ -61,6 +61,9 @@ class _profileState extends State<profile> {
         setState(() {
           _userName = userData['nombreCompleto'] ?? userData['nombre'] ?? "Usuario";
         });
+
+        authProvider.updateUserDataState(userData);
+
       }).catchError((error) {
         setState(() {
           _userName = "Usuario";
@@ -126,9 +129,27 @@ class _profileState extends State<profile> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
-                      "assets/Profile.jpeg",
-                      fit: BoxFit.cover,
+                    child: Consumer<AuthProvider>(
+                      builder: (context, authProvider, _) {
+                        final userPhoto = authProvider.userData?['photo'];
+                        return (userPhoto != null && userPhoto.isNotEmpty && userPhoto.startsWith('http'))
+                            ? Image.network(
+                          userPhoto,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(child: CircularProgressIndicator(color: notifier.buttonColor));
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            print("Error cargando imagen: $error");
+                            return Image.asset("assets/Profile.jpeg", fit: BoxFit.cover);
+                          },
+                        )
+                            : Image.asset(
+                          "assets/Profile.jpeg",
+                          fit: BoxFit.cover,
+                        );
+                      },
                     ),
                   ),
                 ),

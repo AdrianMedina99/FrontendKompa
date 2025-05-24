@@ -468,6 +468,7 @@ class AuthProvider with ChangeNotifier {
         } else if (_userType == 'BUSINESS') {
           _userData = await _apiService.getBusinessUser(_userId!);
         }
+        notifyListeners();
       } catch (e) {
         _errorMessage = 'Error al cargar datos de usuario: $e';
       }
@@ -511,8 +512,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-
-
   // ============================
   // Sección: Utilidades internas
   // ============================
@@ -522,4 +521,11 @@ class AuthProvider with ChangeNotifier {
     _isLoading = loading;
     notifyListeners();
   }
+
+
+  Future<void> updateUserDataState(Map<String, dynamic> userData) async {
+    _userData = userData;
+    notifyListeners();
+  }
+
 }

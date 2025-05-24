@@ -1,13 +1,16 @@
 // ignore_for_file: file_names, non_constant_identifier_names
-
 import 'dart:ui';
-import 'package:kompa/Config/common.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import '../../Config/common.dart';
 import '../../dark_mode.dart';
+import '../../providers/HomeProvider.dart';
 import 'event_detail.dart';
-import 'event.dart';
 import 'see_all.dart';
+import 'package:geocoding/geocoding.dart';
+
 
 class All extends StatefulWidget {
   const All({super.key});
@@ -17,33 +20,56 @@ class All extends StatefulWidget {
 }
 
 class _AllState extends State<All> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(milliseconds: 200),
-    vsync: this,
-    value: 1.0,
-  );
-  bool _isFavorite = false;
-  bool _isFavorite1 = false;
+  late AnimationController _controller;
   ColorNotifire notifier = ColorNotifire();
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+      value: 1.0,
+    );
+  }
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      _fetchEvents();
+    }
+  }
+
+  Future<void> _fetchEvents() async {
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    final position = await Geolocator.getCurrentPosition();
+    await homeProvider.fetchNearbyEvents(position.latitude, position.longitude);
+    await homeProvider.fetchTrendingEvents(position.latitude, position.longitude);
   }
 
   @override
   Widget build(BuildContext context) {
     notifier = Provider.of<ColorNotifire>(context, listen: true);
+    final homeProvider = Provider.of<HomeProvider>(context);
+    final nearbyEvents = homeProvider.nearbyEvents;
+    final trendingEvents = homeProvider.trendingEvents;
+
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: notifier.backGround,
       body: Padding(
-        padding: const EdgeInsets.only(
-          left: 10,
-          right: 10,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Column(
@@ -54,8 +80,8 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 child: Row(
-                  children: [
-                    InkWell(
+                  children: nearbyEvents.map((event) {
+                    return InkWell(
                       onTap: () {
                         Navigator.push(
                           context,
@@ -65,370 +91,114 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
                         );
                       },
                       child: Container(
+                        margin: const EdgeInsets.only(right: 12),
                         height: height / 3,
                         width: width / 1.1,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(40),
-                          gradient: LinearGradient(
-                            end: const Alignment(0.0, -1),
-                            begin: const Alignment(0.0, 0.6),
-                            colors: <Color>[
-                              const Color(0x8A000000),
-                              Colors.black.withOpacity(0.0)
-                            ],
+                          image: DecorationImage(
+                            image: event['photo'] != null && event['photo'].toString().isNotEmpty
+                                ? NetworkImage(event['photo'])
+                                : const AssetImage('assets/Splash 3.png') as ImageProvider,
+                            fit: BoxFit.cover,
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(40),
-                              child: Stack(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(40),
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.5),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                          child: Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child:
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Image.asset(
-                                    "assets/Splash 1.png",
-                                    fit: BoxFit.cover,
-                                    height: height / 3,
-                                    width: width / 1,
-                                  ),
-                                  Container(
-                                    height: height / 3,
-                                    width: width / 1.1,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(40),
-                                      gradient: LinearGradient(
-                                        end: const Alignment(0.0, -1),
-                                        begin: const Alignment(0.0, 0.6),
-                                        colors: <Color>[
-                                          const Color(0x8A000000),
-                                          Colors.black.withOpacity(0.0)
-                                        ],
-                                      ),
+                                  Text(
+                                    event['title'] ?? 'Sin título',
+                                    style: const TextStyle(
+                                      fontFamily: "Ariom-Bold",
+                                      fontSize: 26,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                  Positioned(
-                                    top: 20,
-                                    right: 20,
-                                    child: Container(
-                                      height: height / 18,
-                                      width: width / 4,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(40),
-                                        border: Border.all(
-                                          color: notifier.backGround,
-                                          width: 2,
-                                        ),
-                                        color: Colors.white.withOpacity(0.2),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Image.asset(
+                                        'assets/Clock.png',
+                                        width: 18,
+                                        height: 18,
+                                        color: Colors.white,
                                       ),
-                                      child: const Center(
-                                        child: Text(
-                                          "23 Jun",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontFamily: "Ariom-Bold",
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: height / 10,
-                                    child: const Padding(
-                                      padding: EdgeInsets.only(
-                                        left: 15,
-                                        right: 15,
-                                      ),
-                                      child: Text(
-                                        "Glowing Art\nPerformance",
-                                        style: TextStyle(
-                                          fontFamily: "Ariom-Bold",
-                                          fontSize: 26,
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        event['startDate']?['seconds'] != null
+                                            ? DateFormat("dd-MM-yyyy 'a las' HH:mm").format(
+                                            DateTime.fromMillisecondsSinceEpoch(event['startDate']['seconds'] * 1000))
+                                            : 'Fecha no disponible',
+                                        style: const TextStyle(
                                           color: Colors.white,
-                                          wordSpacing: 2,
+                                          fontSize: 14,
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                  Positioned(
-                                    bottom: height / 70,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                        left: 15,
-                                        right: 15,
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    children: [
+                                      Image.asset(
+                                        'assets/location.png',
+                                        width: 18,
+                                        height: 18,
+                                        color: Colors.white,
                                       ),
-                                      child: Row(
-                                        // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Image.asset(
-                                            "assets/Clock.png",
-                                            color: Colors.white,
-                                            scale: 2.5,
-                                          ),
-                                          AppConstants.Width(width / 50),
-                                          const Text(
-                                            "22:00 PM",
-                                            style: TextStyle(
+                                      const SizedBox(width: 6),
+                                      FutureBuilder<String>(
+                                        future: event['location'] != null && !event['location'].toString().startsWith('(')
+                                            ? Future.value(event['location'])
+                                            : (event['latitud'] != null && event['longitud'] != null
+                                            ? getCityFromCoordinates(event['latitud'], event['longitud'])
+                                            : Future.value('Ubicación no disponible')),
+                                        builder: (context, snapshot) {
+                                          return Text(
+                                            snapshot.data ?? 'Ubicación no disponible',
+                                            style: const TextStyle(
                                               color: Colors.white,
-                                              fontSize: 16,
+                                              fontSize: 14,
                                             ),
-                                          ),
-                                          AppConstants.Width(width / 30),
-                                          Image.asset(
-                                            "assets/location.png",
-                                            scale: 3,
-                                            color: Colors.white,
-                                          ),
-                                          AppConstants.Width(width / 50),
-                                          const Text(
-                                            "Singapore",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          AppConstants.Width(width / 8),
-                                          Container(
-                                            height: height / 14,
-                                            width: width / 5,
-                                            decoration: const BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Color(0xffD1E50C),
-                                            ),
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                setState(
-                                                  () {
-                                                    _isFavorite = !_isFavorite;
-                                                  },
-                                                );
-                                                _controller.reverse().then(
-                                                      (value) =>
-                                                          _controller.forward(),
-                                                    );
-                                              },
-                                              child: ScaleTransition(
-                                                scale: Tween(
-                                                  begin: 0.7,
-                                                  end: 1.0,
-                                                ).animate(
-                                                  CurvedAnimation(
-                                                    parent: _controller,
-                                                    curve: Curves.linear,
-                                                  ),
-                                                ),
-                                                child: _isFavorite
-                                                    ? const Icon(
-                                                        Icons.favorite,
-                                                        size: 30,
-                                                        color: Colors.red,
-                                                      )
-                                                    : const Icon(
-                                                        Icons.favorite_border,
-                                                        size: 30,
-                                                        color: Colors.black,
-                                                      ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                          );
+                                        },
                                       ),
-                                    ),
+                                    ],
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    AppConstants.Width(width / 30),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Event_detail(),
                           ),
-                        );
-                      },
-                      child: Container(
-                        height: height / 3,
-                        width: width / 1.1,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(40),
-                        ),
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(40),
-                              child: Stack(
-                                children: [
-                                  Image.asset(
-                                    "assets/Splash 2.png",
-                                    fit: BoxFit.fitHeight,
-                                    height: height / 3,
-                                  ),
-                                  Container(
-                                    height: height / 3,
-                                    width: width / 1.1,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(40),
-                                      gradient: LinearGradient(
-                                        end: const Alignment(0.0, -1),
-                                        begin: const Alignment(0.0, 0.6),
-                                        colors: <Color>[
-                                          const Color(0x8A000000),
-                                          Colors.black.withOpacity(0.0)
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 20,
-                                    right: 20,
-                                    child: Container(
-                                      height: height / 18,
-                                      width: width / 4,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(40),
-                                        border: Border.all(
-                                          color: notifier.backGround,
-                                          width: 2,
-                                        ),
-                                        color: Colors.white.withOpacity(0.2),
-                                      ),
-                                      child: const Center(
-                                        child: Text(
-                                          "10 Apr",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontFamily: "Ariom-Bold",
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: height / 10,
-                                    child: const Padding(
-                                      padding: EdgeInsets.only(
-                                        left: 15,
-                                        right: 15,
-                                      ),
-                                      child: Text(
-                                        "Glowing Art\nPerformance",
-                                        style: TextStyle(
-                                          fontFamily: "Ariom-Bold",
-                                          fontSize: 26,
-                                          color: Colors.white,
-                                          wordSpacing: 2,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: height / 70,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                        left: 15,
-                                        right: 15,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Image.asset(
-                                            "assets/Clock.png",
-                                            color: const Color(0xffFFFFFF),
-                                            scale: 2.5,
-                                          ),
-                                          AppConstants.Width(width / 35),
-                                          const Text(
-                                            "10:00 PM",
-                                            style: TextStyle(
-                                              color: Color(0xffFFFFFF),
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          AppConstants.Width(width / 20),
-                                          Image.asset(
-                                            "assets/location.png",
-                                            scale: 3,
-                                            color: const Color(0xffFFFFFF),
-                                          ),
-                                          AppConstants.Width(width / 35),
-                                          const Text(
-                                            "Tokyo",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          AppConstants.Width(width / 5),
-                                          Container(
-                                            height: height / 14,
-                                            width: width / 5,
-                                            decoration: const BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Color(0xffD1E50C),
-                                            ),
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                setState(
-                                                  () {
-                                                    _isFavorite1 =
-                                                        !_isFavorite1;
-                                                  },
-                                                );
-                                                _controller.reverse().then(
-                                                      (value) =>
-                                                          _controller.forward(),
-                                                    );
-                                              },
-                                              child: ScaleTransition(
-                                                scale: Tween(
-                                                  begin: 0.7,
-                                                  end: 1.0,
-                                                ).animate(
-                                                  CurvedAnimation(
-                                                    parent: _controller,
-                                                    curve: Curves.linear,
-                                                  ),
-                                                ),
-                                                child: _isFavorite1
-                                                    ? const Icon(
-                                                        Icons.favorite,
-                                                        size: 30,
-                                                        color: Colors.red,
-                                                      )
-                                                    : const Icon(
-                                                        Icons.favorite_border,
-                                                        size: 30,
-                                                        color: Color(0xff131313),
-                                                      ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
                         ),
                       ),
-                    ),
-                  ],
+                    );
+                  }).toList(),
                 ),
               ),
               AppConstants.Height(height / 30),
               Row(
                 children: [
                   Text(
-                    "Trending Event",
+                    "Eventos cercanos",
                     style: TextStyle(
-                      fontSize: 32,
+                      fontSize: 28,
                       color: notifier.textColor,
                       fontFamily: "Ariom-Bold",
                     ),
@@ -455,94 +225,124 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
               ),
               AppConstants.Height(height / 40),
               ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                // itemExtent: 1,
-                itemCount: eventDetail.length,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: trendingEvents.length,
                 itemBuilder: (_, index) {
-                  EventModel data = eventDetail[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(
-                      left: 10,
-                      right: 10,
-                      bottom: 15,
-                    ),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Event_detail(),
-                          ),
-                        );
-                      },
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ImageFiltered(
-                            imageFilter: ImageFilter.blur(
-                              sigmaY: 1,
-                              sigmaX: 1,
-                            ),
-                            enabled: false,
-                            child: Container(
-                              height: height / 8,
-                              width: width / 4,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25),
-                                image: DecorationImage(
-                                  image: AssetImage(data.image),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                          AppConstants.Width(width / 30),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  data.name,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontFamily: "Ariom-Bold",
-                                    color: notifier.textColor,
-                                  ),
-                                ),
-                                SizedBox(height: height / 30),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      data.time,
-                                      style: TextStyle(
-                                        color: notifier.subtitleTextColor,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: width / 3.9,
-                                    ),
-                                    Text(
-                                      data.location,
-                                      style: TextStyle(
-                                        color: notifier.subtitleTextColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  final event = trendingEvents[index];
+                  return trendingEventCard(
+                    image: event['photo'],
+                    name: event['title'],
+                    time: event['startDate']?['seconds'] != null
+                        ? DateTime.fromMillisecondsSinceEpoch(event['startDate']['seconds'] * 1000).toIso8601String()
+                        : null,
+                    location: event['location'],
+                    lat: event['latitud'],
+                    lng: event['longitud'],
                   );
                 },
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget trendingEventCard({
+    required String? image,
+    required String? name,
+    required String? time,
+    required String? location,
+    double? lat,
+    double? lng,
+  }) {
+    String formattedTime = 'Fecha no disponible';
+    if (time != null) {
+      try {
+        DateTime dateTime = DateTime.parse(time);
+        formattedTime = DateFormat("dd-MM-yyyy 'a las' HH:mm").format(dateTime);
+      } catch (_) {}
+    }
+
+    Widget locationWidget;
+    if (location != null && !location.startsWith('(')) {
+      locationWidget = Text(location, style: const TextStyle(fontSize: 13));
+    } else if (lat != null && lng != null) {
+      locationWidget = FutureBuilder<String>(
+        future: getCityFromCoordinates(lat, lng),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text('Cargando ciudad...', style: TextStyle(fontSize: 13));
+          }
+          return Text(snapshot.data ?? 'Ubicación no disponible', style: const TextStyle(fontSize: 13));
+        },
+      );
+    } else {
+      locationWidget = const Text('Ubicación no disponible', style: TextStyle(fontSize: 13));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: notifier.backGround,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: notifier.inv.withOpacity(0.12),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 100,
+                width: 100,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  image: DecorationImage(
+                    image: NetworkImage(image ?? 'https://via.placeholder.com/150'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name ?? 'Sin título',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: notifier.inv,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      formattedTime,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: notifier.inv,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    DefaultTextStyle(
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: notifier.inv,
+                      ),
+                      child: locationWidget,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -551,70 +351,14 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget Event({
-    required String image,
-    required String name,
-    required String time,
-    required String location,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 10,
-        right: 10,
-        bottom: 10,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: MediaQuery.of(context).size.height / 10,
-            width: MediaQuery.of(context).size.width / 5,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(image),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaY: 1,
-                sigmaX: 1,
-              ),
-              child: const Column(
-                children: [
-                  Text(
-                    "data",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          AppConstants.Width(MediaQuery.of(context).size.width / 30),
-          Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontFamily: "Ariom-Bold",
-                ),
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height / 40),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(time),
-                  SizedBox(width: MediaQuery.of(context).size.width / 6),
-                  Text(location),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+  Future<String> getCityFromCoordinates(double lat, double lng) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+      if (placemarks.isNotEmpty) {
+        return placemarks.first.locality ?? 'Ciudad desconocida';
+      }
+    } catch (_) {}
+    return 'Ciudad desconocida';
   }
+
 }

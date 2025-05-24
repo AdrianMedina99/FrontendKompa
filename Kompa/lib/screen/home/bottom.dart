@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../dark_mode.dart';
 import '../category/CategoryScreen.dart';
 import '../profile/profile.dart';
-import 'home.dart';
+import 'HomeScreen.dart';
 import 'message.dart';
 
 

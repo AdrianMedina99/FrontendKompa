@@ -146,7 +146,7 @@ class _WelcomeState extends State<Welcome> {
                           style: TextStyle(
                             fontSize: 62,
                             fontFamily: "Ariom-Bold",
-                            color: notifier.welcomeTextColor,
+                            color: notifier.buttonColor,
                           ),
                         ),
                       ],

@@ -1,11 +1,32 @@
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ColorNotifire with ChangeNotifier {
+  bool _isDark = false;
+  bool get isDark => _isDark;
+
+  ColorNotifire() {
+    _loadTheme();
+  }
+
+  void isavalable(bool value) async {
+    _isDark = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', value);
+  }
+
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isDark = prefs.getBool('isDarkMode') ?? false;
+    notifyListeners();
+  }
 
 
   get backGround => isDark ? const Color(0xff131313): const Color(0xffFFFFFF);
+  get inv => isDark ? const Color(0xffFFFFFF) : const Color(0xff131313);
   get textColor1 => isDark ? const Color(0xffD1E50C): const Color(0xff131313);
   get textColor => isDark ? const Color(0xffFFFFFF): const Color(0xff131313);
   get subtitleTextColor => isDark ? const Color(0xffB6B6C0): const Color(0xff131313);
@@ -27,11 +48,5 @@ class ColorNotifire with ChangeNotifier {
   get buttonColor => const Color(0xffD1E50C);
   get buttonTextColor => const Color(0xff131313);
 
-  bool _isDark = false;
-  bool get isDark => _isDark;
 
-  void isavalable(bool value) {
-    _isDark = value;
-    notifyListeners();
-  }
 }
