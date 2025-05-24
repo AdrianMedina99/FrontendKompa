@@ -382,9 +382,16 @@ class ApiService {
   }
 
 // Obtener eventos cercanos a una ubicación
-  Future<List<dynamic>> getEventsNearby(double lat, double lng, {int maxResults = 10}) async {
+  // Obtener eventos cercanos a una ubicación
+  Future<List<dynamic>> getEventsNearby(double lat, double lng, {int maxResults = 10, String? categoryId}) async {
+    String url = '$baseUrl/api/events/nearby?lat=$lat&lng=$lng&maxResults=$maxResults';
+
+    if (categoryId != null) {
+      url += '&categoryId=$categoryId';
+    }
+
     final response = await http.get(
-      Uri.parse('$baseUrl/api/events/nearby?lat=$lat&lng=$lng&maxResults=$maxResults'),
+      Uri.parse(url),
       headers: _getHeaders(),
     );
     if (response.statusCode == 200) {

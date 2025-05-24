@@ -35,25 +35,26 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
       _initialized = true;
-      _fetchEvents();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _fetchEvents();
+      });
     }
   }
 
   Future<void> _fetchEvents() async {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    final position = await Geolocator.getCurrentPosition();
-    await homeProvider.fetchNearbyEvents(position.latitude, position.longitude);
-    await homeProvider.fetchTrendingEvents(position.latitude, position.longitude);
+    try {
+      final position = homeProvider.lastKnownPosition ??
+          await homeProvider.getCurrentPosition();
+
+      await homeProvider.fetchAllEvents(position.latitude, position.longitude);
+    } catch (e) {
+      // Manejo de errores
+    }
   }
 
   @override
@@ -80,7 +81,7 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 child: Row(
-                  children: nearbyEvents.map((event) {
+                  children: nearbyEvents.take(2).map((event) {
                     return InkWell(
                       onTap: () {
                         Navigator.push(

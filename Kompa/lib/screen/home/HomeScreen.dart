@@ -6,11 +6,12 @@ import 'package:provider/provider.dart';
 import '../../dark_mode.dart';
 import '../../providers/AuthProvider.dart';
 import '../../providers/CategoryProvider.dart';
+import '../../providers/HomeProvider.dart';
+import 'HomeCategoriesView.dart';
 import 'all.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import '../Home/search.dart';
-
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -39,7 +40,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         });
 
         authProvider.updateUserDataState(userData);
-
       }).catchError((error) {
         setState(() {
           _userName = "Usuario";
@@ -258,11 +258,31 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     children: [
                       const All(),
                       ...categories.map((category) {
-                        return Center(
-                          child: Text(
-                            "Vista para ${category['title']}",
-                            style: TextStyle(color: notifier.textColor),
-                          ),
+                        return Consumer<HomeProvider>(
+                          builder: (context, homeProvider, child) {
+                            if (homeProvider.isLoading) {
+                              return ListView.builder(
+                                padding: const EdgeInsets.all(16),
+                                itemCount: 5, // Número de esqueletos a mostrar
+                                itemBuilder: (_, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16.0),
+                                    child: Container(
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        color: notifier.backGround.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            }
+                            return HomeCategoriesView(
+                              categoryId: category['id'],
+                              categoryTitle: category['title'],
+                            );
+                          },
                         );
                       }).toList(),
                     ],
