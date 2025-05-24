@@ -112,7 +112,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               backgroundColor: Colors.transparent,
               foregroundImage: (userPhoto != null && userPhoto.isNotEmpty && userPhoto.startsWith('http'))
                   ? NetworkImage(userPhoto)
-                  : const AssetImage('assets/Profile.jpeg') as ImageProvider,
+                  : const AssetImage('assets/Profile.png') as ImageProvider,
               child: (userPhoto == null || userPhoto.isEmpty)
                   ? const Icon(Icons.person, color: Colors.grey)
                   : null,
@@ -263,7 +263,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                             if (homeProvider.isLoading) {
                               return ListView.builder(
                                 padding: const EdgeInsets.all(16),
-                                itemCount: 5, // Número de esqueletos a mostrar
+                                itemCount: 5,
                                 itemBuilder: (_, index) {
                                   return Padding(
                                     padding: const EdgeInsets.only(bottom: 16.0),

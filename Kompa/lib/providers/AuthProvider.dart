@@ -45,6 +45,9 @@ class AuthProvider with ChangeNotifier {
   /// Indica si el usuario eligió "recordarme".
   bool _rememberMe = false;
 
+///Getters para acceder a los servicios y variables privadas
+  ApiService get apiService => _apiService;
+
   // Getters públicos
   bool get isAuthenticated => _isAuthenticated;
   bool get isLoading => _isLoading;

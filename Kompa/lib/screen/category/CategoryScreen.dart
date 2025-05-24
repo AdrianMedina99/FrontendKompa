@@ -45,7 +45,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
         title: Row(
           children: [
             const CircleAvatar(
-              foregroundImage: AssetImage("assets/Profile.jpeg"),
+              foregroundImage: AssetImage("assets/Profile.png"),
             ),
             AppConstants.Width(width / 50),
             Text(

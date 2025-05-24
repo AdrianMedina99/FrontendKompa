@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../Config/common.dart';
 import '../../dark_mode.dart';
 import '../../providers/HomeProvider.dart';
+import '../../providers/AuthProvider.dart';
 import 'package:geocoding/geocoding.dart';
 
 class HomeCategoriesView extends StatefulWidget {
@@ -57,16 +58,27 @@ class _HomeCategoriesViewState extends State<HomeCategoriesView> with SingleTick
 
   Future<void> _fetchEvents() async {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    homeProvider.setAuthProvider(authProvider);
 
     try {
-      final position = homeProvider.lastKnownPosition ??
-          await homeProvider.getCurrentPosition();
+      if (homeProvider.isBusinessUser && homeProvider.currentUserId != null) {
+        final businessEvents = await homeProvider.apiService.getEventsByBusinessId(homeProvider.currentUserId!);
+        final filtered = businessEvents.where((event) => event['categoryId'] == widget.categoryId).toList();
+        homeProvider.trendingEvents.clear();
+        homeProvider.trendingEvents.addAll(List<Map<String, dynamic>>.from(filtered));
+        homeProvider.notifyListeners();
+      } else {
+        final position = homeProvider.lastKnownPosition ??
+            await homeProvider.getCurrentPosition();
 
-      await homeProvider.fetchEventsByCategory(
-          position.latitude,
-          position.longitude,
-          widget.categoryId
-      );
+        await homeProvider.fetchEventsByCategory(
+            position.latitude,
+            position.longitude,
+            widget.categoryId
+        );
+      }
     } catch (e) {
       // Manejo de errores
     }
@@ -79,7 +91,6 @@ class _HomeCategoriesViewState extends State<HomeCategoriesView> with SingleTick
     final trendingEvents = homeProvider.trendingEvents;
 
     var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: notifier.backGround,

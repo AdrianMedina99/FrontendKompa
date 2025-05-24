@@ -382,7 +382,6 @@ class ApiService {
   }
 
 // Obtener eventos cercanos a una ubicación
-  // Obtener eventos cercanos a una ubicación
   Future<List<dynamic>> getEventsNearby(double lat, double lng, {int maxResults = 10, String? categoryId}) async {
     String url = '$baseUrl/api/events/nearby?lat=$lat&lng=$lng&maxResults=$maxResults';
 
@@ -398,6 +397,20 @@ class ApiService {
       return jsonDecode(response.body);
     } else {
       throw Exception('Error al obtener eventos cercanos: ${response.body}');
+    }
+  }
+
+//Obtener eventos por userID
+  Future<List<dynamic>> getEventsByBusinessId(String businessId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/events/by-business?businessId=$businessId'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener eventos del negocio: ${response.body}');
     }
   }
 

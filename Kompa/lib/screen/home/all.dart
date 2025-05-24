@@ -1,11 +1,11 @@
 // ignore_for_file: file_names, non_constant_identifier_names
 import 'dart:ui';
-import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../Config/common.dart';
 import '../../dark_mode.dart';
+import '../../providers/AuthProvider.dart';
 import '../../providers/HomeProvider.dart';
 import 'event_detail.dart';
 import 'see_all.dart';
@@ -61,8 +61,13 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     notifier = Provider.of<ColorNotifire>(context, listen: true);
     final homeProvider = Provider.of<HomeProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    homeProvider.setAuthProvider(authProvider);
+
     final nearbyEvents = homeProvider.nearbyEvents;
     final trendingEvents = homeProvider.trendingEvents;
+    final isBusinessUser = homeProvider.isBusinessUser;
 
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
@@ -197,7 +202,7 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
               Row(
                 children: [
                   Text(
-                    "Eventos cercanos",
+                    isBusinessUser ? "Mis eventos" : "Eventos cercanos",
                     style: TextStyle(
                       fontSize: 28,
                       color: notifier.textColor,

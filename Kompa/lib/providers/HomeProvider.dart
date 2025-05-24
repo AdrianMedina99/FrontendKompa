@@ -3,9 +3,12 @@ import 'package:geolocator/geolocator.dart';
 import '../service/apiService.dart';
 import 'dart:convert';
 
+import 'AuthProvider.dart';
+
 class HomeProvider with ChangeNotifier {
   // Variables
   final ApiService apiService;
+  AuthProvider? _authProvider;
 
   List<Map<String, dynamic>> _nearbyEvents = [];
   List<Map<String, dynamic>> _trendingEvents = [];
@@ -22,6 +25,15 @@ class HomeProvider with ChangeNotifier {
   Position? get lastKnownPosition => _lastKnownPosition;
 
   HomeProvider({required this.apiService});
+
+  ///Establecer la referencia al AuthProvider
+  void setAuthProvider(AuthProvider authProvider) {
+    _authProvider = authProvider;
+  }
+
+  ///Verificar tipo de usuario
+  bool get isBusinessUser => _authProvider?.userType == 'BUSINESS';
+  String? get currentUserId => _authProvider?.userId;
 
   /// Obtiene eventos cercanos basados en latitud y longitud.
   Future<void> fetchNearbyEvents(double lat, double lng) async {
@@ -126,13 +138,18 @@ class HomeProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final nearbyFuture = apiService.getEventsNearby(lat, lng, maxResults: 10);
-      final trendingFuture = apiService.getEventsNearby(lat, lng, maxResults: 10);
+      if (isBusinessUser && currentUserId != null) {
+        final businessEvents = await apiService.getEventsByBusinessId(currentUserId!);
+        _nearbyEvents = List<Map<String, dynamic>>.from(businessEvents);
+        _trendingEvents = _nearbyEvents;
+      } else {
+        final nearbyFuture = apiService.getEventsNearby(lat, lng, maxResults: 10);
+        final trendingFuture = apiService.getEventsNearby(lat, lng, maxResults: 10);
 
-      final results = await Future.wait([nearbyFuture, trendingFuture]);
-
-      _nearbyEvents = List<Map<String, dynamic>>.from(results[0]);
-      _trendingEvents = List<Map<String, dynamic>>.from(results[1]);
+        final results = await Future.wait([nearbyFuture, trendingFuture]);
+        _nearbyEvents = List<Map<String, dynamic>>.from(results[0]);
+        _trendingEvents = List<Map<String, dynamic>>.from(results[1]);
+      }
       _allEventsLoaded = true;
     } catch (e) {
       _nearbyEvents = [];

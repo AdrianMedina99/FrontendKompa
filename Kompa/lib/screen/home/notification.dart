@@ -82,7 +82,7 @@ class _notificationState extends State<notification> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Image.asset(
-                    "assets/Profile.jpeg",
+                    "assets/Profile.png",
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -225,7 +225,7 @@ class _notificationState extends State<notification> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Image.asset(
-                    "assets/Profile.jpeg",
+                    "assets/Profile.png",
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -368,7 +368,7 @@ class _notificationState extends State<notification> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Image.asset(
-                    "assets/Profile.jpeg",
+                    "assets/Profile.png",
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -513,7 +513,7 @@ class _notificationState extends State<notification> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Image.asset(
-                    "assets/Profile.jpeg",
+                    "assets/Profile.png",
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -560,7 +560,7 @@ class _notificationState extends State<notification> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Image.asset(
-                    "assets/Profile.jpeg",
+                    "assets/Profile.png",
                     fit: BoxFit.cover,
                   ),
                 ),
