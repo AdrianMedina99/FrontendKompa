@@ -350,7 +350,7 @@ class _profileState extends State<profile> {
                         title: "Información Personal",
                         backgroundColor: notifier.backGround,
                         headerColor: notifier.buttonColor,
-                        textColor: notifier.textColor,
+                        textColor: notifier.svgColor,
                         shadowColor: notifier.inv,      
                         children: userType == "CLIENT" ? _buildClientDetails() : _buildBusinessDetails(),
                       ),

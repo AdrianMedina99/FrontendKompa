@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../dark_mode.dart';
 import '../../providers/AuthProvider.dart';
+import '../profile/edit_profile.dart';
 import '../profile/list_friend.dart';
 import '../profile/payment_card.dart';
 import '../profile/wishlist.dart';
@@ -68,6 +69,23 @@ class _SettingState extends State<Setting> {
               onChanged: (bool value) {
                 notifier.isavalable(value);
               },
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              final userType = authProvider.userType;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Edit_Profile(userType: userType ?? "CLIENT"),
+                ),
+              );
+            },
+            child: accountDetails(
+              image: "assets/Profile Bottom.png",
+              name: "Editar Perfil",
+              icon: "assets/arrow-right.png",
+              onPress: () {},
             ),
           ),
           InkWell(

@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const apiBaseUrl = 'https://b173-2a0c-5a80-2305-f700-2dd6-790d-148b-59f4.ngrok-free.app';
+    const apiBaseUrl = 'https://76f8-2a0c-5a80-2305-f700-2dd6-790d-148b-59f4.ngrok-free.app';
     final apiService = ApiService(baseUrl: apiBaseUrl);
 
     return MultiProvider(
@@ -96,7 +96,6 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Muestra una pantalla de carga mientras se navega
     return Scaffold(
       body: Center(
         child: CircularProgressIndicator(

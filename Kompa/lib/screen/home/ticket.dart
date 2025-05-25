@@ -8,7 +8,7 @@ import 'package:syncfusion_flutter_barcodes/barcodes.dart';
 
 import '../../Config/common.dart';
 import '../../dark_mode.dart';
-import '../category/ticket_detail.dart';
+import '../category/CategoryDetail.dart';
 import 'bottom.dart';
 
 class ticket extends StatefulWidget {
@@ -581,14 +581,14 @@ class _ticketState extends State<ticket> {
               ),
               AppConstants.Height(height / 25),
               InkWell(
-                onTap: () {
+               /* onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const Ticket_Detail(),
+                      builder: (context) => const CategoryDetail(),
                     ),
                   );
-                },
+                },*/
                 child: Container(
                   height: height / 13,
                   width: width / 1.5,

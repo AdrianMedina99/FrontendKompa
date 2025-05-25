@@ -8,7 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../dark_mode.dart';
-import 'summary.dart';
+import 'EventForm.dart';
 
 class ticket1 extends StatefulWidget {
   const ticket1({Key? key}) : super(key: key);
@@ -1013,12 +1013,11 @@ class _ticket extends State<ticket1> {
         ),
         child: InkWell(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const Summary(),
+            /*Navigator.push(
+              context,MaterialPageRoute(
+                builder: (context) => const EventForm(),
               ),
-            );
+            );*/
             setState(() {});
           },
           child: Container(
