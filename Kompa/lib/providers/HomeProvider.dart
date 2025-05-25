@@ -102,7 +102,6 @@ class HomeProvider with ChangeNotifier {
     } catch (e) {
       _trendingEvents = [];
     }
-
     _isLoading = false;
     notifyListeners();
   }

@@ -1,5 +1,6 @@
 // lib/providers/auth_provider.dart
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -529,6 +530,30 @@ class AuthProvider with ChangeNotifier {
   Future<void> updateUserDataState(Map<String, dynamic> userData) async {
     _userData = userData;
     notifyListeners();
+  }
+
+  Future<String> updateUserWithPhoto(Map<String, dynamic> userData, File? photoFile) async {
+    try {
+      if (_userId == null || _userType == null) {
+        throw Exception('No hay sesión activa');
+      }
+
+      String result;
+      if (_userType == 'BUSINESS') {
+        result = await _apiService.updateBusinessUserWithPhoto(_userId!, userData, photoFile);
+      } else if (_userType == 'CLIENT') {
+        result = await _apiService.updateClientUserWithPhoto(_userId!, userData, photoFile);
+      } else {
+        throw Exception('Tipo de usuario desconocido');
+      }
+
+      // Actualizar datos locales
+      await _loadUserData();
+
+      return result;
+    } catch (e) {
+      throw Exception('Error al actualizar los datos del usuario: $e');
+    }
   }
 
 }

@@ -1,15 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class ApiService {
   final String baseUrl;
   String? _token;
 
-  // Constructor con la URL base de la API
   ApiService({required this.baseUrl});
 
-  // Establecer token para solicitudes autenticadas
-  // En ApiService.dart
   void setToken(String? token) {
     _token = token;
   }
@@ -171,6 +170,44 @@ class ApiService {
     }
   }
 
+  // Actualizar un usuario de negocio con foto
+  Future<String> updateBusinessUserWithPhoto(String id, Map<String, dynamic> userData, File? photoFile) async {
+    try {
+      var request = http.MultipartRequest('PUT', Uri.parse('$baseUrl/api/businessUsers/$id'));
+
+      // Agregar token de autorización
+      request.headers.addAll({
+        'Authorization': 'Bearer $_token',
+      });
+
+      // Convertir userData a formato JSON y agregarlo como parte de la solicitud
+      request.files.add(http.MultipartFile.fromString(
+        'user',
+        jsonEncode(userData),
+        contentType: MediaType('application', 'json'),
+      ));
+
+      // Si hay una foto para subir, agregarla
+      if (photoFile != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'photo',
+          photoFile.path,
+        ));
+      }
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        throw Exception('Error al actualizar usuario de negocio: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error en la solicitud: $e');
+    }
+  }
+
   // Eliminar un usuario de negocio
   Future<String> deleteBusinessUser(String id) async {
     final response = await http.delete(
@@ -232,6 +269,44 @@ class ApiService {
     }
   }
 
+  // Actualizar un usuario cliente con foto
+  Future<String> updateClientUserWithPhoto(String id, Map<String, dynamic> userData, File? photoFile) async {
+    try {
+      var request = http.MultipartRequest('PUT', Uri.parse('$baseUrl/api/clientUsers/$id'));
+
+      // Agregar token de autorización
+      request.headers.addAll({
+        'Authorization': 'Bearer $_token',
+      });
+
+      // Convertir userData a formato JSON y agregarlo como parte de la solicitud
+      request.files.add(http.MultipartFile.fromString(
+        'user',
+        jsonEncode(userData),
+        contentType:MediaType('application', 'json'),
+      ));
+
+      // Si hay una foto para subir, agregarla
+      if (photoFile != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'photo',
+          photoFile.path,
+        ));
+      }
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        throw Exception('Error al actualizar usuario cliente: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error en la solicitud: $e');
+    }
+  }
+
   // Eliminar un usuario cliente
   Future<String> deleteClientUser(String id) async {
     final response = await http.delete(
@@ -245,8 +320,6 @@ class ApiService {
       throw Exception('Error al eliminar usuario cliente: ${response.body}');
     }
   }
-
-  // Dentro de ApiService
 
 // Obtener todas las categorías
   Future<List<dynamic>> getAllCategories() async {
@@ -313,7 +386,6 @@ class ApiService {
     }
   }
 
-  // Dentro de ApiService
 // Gestión de eventos
 
 // Obtener todos los eventos
@@ -413,5 +485,40 @@ class ApiService {
       throw Exception('Error al obtener eventos del negocio: ${response.body}');
     }
   }
+
+
+  // Subir una imagen de evento
+  Future<String> uploadEventImage(File imageFile) async {
+    try {
+      final List<int> imageBytes = await imageFile.readAsBytes();
+
+      final String base64Image = base64Encode(imageBytes);
+
+      final String fileName = 'event_${DateTime.now().millisecondsSinceEpoch}.png';
+
+      final Map<String, dynamic> requestBody = {
+        'fileName': fileName,
+        'fileType': 'png',
+        'content': base64Image,
+        'name': 'Evento image'
+      };
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/media/upload'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        throw Exception('Error al subir imagen: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error al procesar la imagen: $e');
+    }
+  }
+
+
 
 }

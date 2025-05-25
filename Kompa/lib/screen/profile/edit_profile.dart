@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../Config/common.dart';
@@ -19,6 +22,8 @@ class Edit_Profile extends StatefulWidget {
 class _Edit_ProfileState extends State<Edit_Profile> {
   ColorNotifire notifier = ColorNotifire();
   Map<String, dynamic>? userData;
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -92,6 +97,16 @@ class _Edit_ProfileState extends State<Edit_Profile> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     notifier = Provider.of<ColorNotifire>(context, listen: true);
@@ -130,20 +145,7 @@ class _Edit_ProfileState extends State<Edit_Profile> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Container(
-                height: height / 7,
-                width: width / 3,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    "assets/Profile.png",
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+              child: _buildProfileImage(),
             ),
             SizedBox(height: height / 40),
             widget.userType == "CLIENT"
@@ -153,62 +155,62 @@ class _Edit_ProfileState extends State<Edit_Profile> {
         ),
       ),
       bottomNavigationBar: InkWell(
-          onTap: () async {
-            final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        onTap: () async {
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-            try {
-              if (_nameController.text.isEmpty || _phoneController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Por favor, complete todos los campos obligatorios")),
-                );
-                return;
-              }
-
-              Map<String, dynamic> updatedData;
-
-              if (widget.userType == "CLIENT") {
-                final parsedDate = DateFormat('dd/MM/yyyy').parse(_dateController.text);
-                final formattedDate = parsedDate.toUtc().toIso8601String();
-                updatedData = {
-                  ...userData!,
-                  'nombre': _nameController.text,
-                  'apellidos': _lastNameController.text,
-                  'phone': int.tryParse(_phoneController.text) ?? _phoneController.text,
-                  'description': _descriptionController.text,
-                  'dni': _dniController.text,
-                  'gender': _selectedValue,
-                  'birthDate': formattedDate,
-                };
-              } else if (widget.userType == "BUSINESS") {
-                updatedData = {
-                  ...userData!,
-                  'nombre': _nameController.text,
-                  'phone': int.tryParse(_phoneController.text) ?? _phoneController.text,
-                  'description': _descriptionController.text,
-                  'website': _websiteController.text,
-                };
-              } else {
-                throw Exception("Tipo de usuario desconocido");
-              }
-
-              await authProvider.updateUserData(updatedData);
-              await authProvider.getCurrentUserData(); // <-- Refresca los datos
-
+          try {
+            if (_nameController.text.isEmpty || _phoneController.text.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Datos actualizados correctamente")),
+                const SnackBar(content: Text("Por favor, complete todos los campos obligatorios")),
               );
-
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const BottomBarScreen()),
-                    (route) => false,
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Error al actualizar los datos: $e")),
-              );
+              return;
             }
-          },
+
+            Map<String, dynamic> updatedData;
+
+            if (widget.userType == "CLIENT") {
+              final parsedDate = DateFormat('dd/MM/yyyy').parse(_dateController.text);
+              final formattedDate = parsedDate.toUtc().toIso8601String();
+              updatedData = {
+                ...userData!,
+                'nombre': _nameController.text,
+                'apellidos': _lastNameController.text,
+                'phone': int.tryParse(_phoneController.text) ?? _phoneController.text,
+                'description': _descriptionController.text,
+                'dni': _dniController.text,
+                'gender': _selectedValue,
+                'birthDate': formattedDate,
+              };
+            } else if (widget.userType == "BUSINESS") {
+              updatedData = {
+                ...userData!,
+                'nombre': _nameController.text,
+                'phone': int.tryParse(_phoneController.text) ?? _phoneController.text,
+                'description': _descriptionController.text,
+                'website': _websiteController.text,
+              };
+            } else {
+              throw Exception("Tipo de usuario desconocido");
+            }
+
+            await authProvider.updateUserWithPhoto(updatedData, _profileImage);
+            await authProvider.getCurrentUserData();
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Datos actualizados correctamente")),
+            );
+
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const BottomBarScreen()),
+                  (route) => false,
+            );
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Error al actualizar los datos: $e")),
+            );
+          }
+        },
 
         child: Container(
           height: height / 11,
@@ -380,6 +382,71 @@ class _Edit_ProfileState extends State<Edit_Profile> {
             width: 24,
           ),
           controller: _descriptionController,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfileImage() {
+    return Stack(
+      children: [
+        Container(
+          height: MediaQuery.of(context).size.height / 7,
+          width: MediaQuery.of(context).size.width / 3,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: _profileImage != null
+                ? Image.file(
+              _profileImage!,
+              fit: BoxFit.cover,
+            )
+                : (userData != null && userData!['photo'] != null && userData!['photo'].toString().isNotEmpty)
+                ? Image.network(
+              userData!['photo'],
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                        : null,
+                    color: notifier.buttonColor,
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) => Image.asset(
+                "assets/Profile.png",
+                fit: BoxFit.cover,
+              ),
+            )
+                : Image.asset(
+              "assets/Profile.png",
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: InkWell(
+            onTap: _pickImage,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xffD1E50C),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.camera_alt,
+                color: notifier.textColor,
+                size: 18,
+              ),
+            ),
+          ),
         ),
       ],
     );
