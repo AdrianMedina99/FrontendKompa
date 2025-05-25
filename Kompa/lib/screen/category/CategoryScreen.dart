@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 import '../../Config/common.dart';
 import '../../dark_mode.dart';
 import '../../providers/CategoryProvider.dart';
+import '../../providers/AuthProvider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../Home/search.dart';
+import 'CategoryDetail.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});
@@ -32,6 +34,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
   Widget build(BuildContext context) {
     final notifier = Provider.of<ColorNotifire>(context);
     final categoryProvider = Provider.of<CategoryProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
+
+    final userPhoto = authProvider.userData?['photo'];
 
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
@@ -44,8 +49,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
         automaticallyImplyLeading: false,
         title: Row(
           children: [
-            const CircleAvatar(
-              foregroundImage: AssetImage("assets/Profile.png"),
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: Colors.transparent,
+              foregroundImage: (userPhoto != null && userPhoto.isNotEmpty && userPhoto.startsWith('http'))
+                  ? NetworkImage(userPhoto)
+                  : const AssetImage('assets/Profile.png') as ImageProvider,
+              child: (userPhoto == null || userPhoto.isEmpty)
+                  ? const Icon(Icons.person, color: Colors.grey)
+                  : null,
             ),
             AppConstants.Width(width / 50),
             Text(
@@ -126,7 +138,17 @@ class _CategoryScreenState extends State<CategoryScreen> {
               itemBuilder: (context, index) {
                 final category = categories[index];
                 return InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CategoryDetail(
+                          categoryId: category['id'],
+                          categoryTitle: category['title'],
+                        ),
+                      ),
+                    );
+                  },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
