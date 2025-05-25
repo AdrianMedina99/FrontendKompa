@@ -101,12 +101,54 @@ class _Edit_ProfileState extends State<Edit_Profile> {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
+      try {
+        // Verificar la extensión del archivo
+        final String extension = pickedFile.path.split('.').last.toLowerCase();
+        final List<String> formatosPermitidos = ['png', 'svg', 'jpg', 'jpeg', 'gif', 'webp'];
+
+        if (!formatosPermitidos.contains(extension)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Formato no soportado. Por favor usa PNG, SVG, JPG, JPEG, GIF o WEBP."),
+              duration: Duration(seconds: 3),
+            ),
+          );
+          return;
+        }
+
+        // Verificar el tamaño del archivo (1.5MB como límite para compensar la codificación base64)
+        final File file = File(pickedFile.path);
+        final int fileSize = await file.length();
+        final int maxSize = (1.5 * 1024 * 1024).toInt(); // 1.5MB en bytes
+
+        print("Tamaño original de la imagen: ${(fileSize / 1024).toStringAsFixed(2)}KB");
+
+        if (fileSize > maxSize) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("La imagen es demasiado grande. El tamaño máximo permitido es 1.5MB."),
+              duration: Duration(seconds: 3),
+            ),
+          );
+          return;
+        }
+
+        // Si pasa todas las validaciones, asignar la imagen
+        setState(() {
+          _profileImage = file;
+        });
+
+      } catch (e) {
+        print("Error al procesar la imagen: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error al procesar la imagen: $e"),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     notifier = Provider.of<ColorNotifire>(context, listen: true);
