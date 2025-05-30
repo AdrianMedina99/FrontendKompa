@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../providers/AuthProvider.dart';
 import '../../providers/HomeProvider.dart';
 import '../../widget/ExpandableInfoCard.dart';
-import '../Home/event_detail.dart';
+import '../Home/Event_detail.dart';
 import '../Home/setting.dart';
 import '../Profile/share_profile.dart';
 import '../../dark_mode.dart';
@@ -518,12 +518,12 @@ class _profileState extends State<profile> {
 
                 return InkWell(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Event_detail(),
-                      ),
-                    );
+                    /*Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Event_detail(),
+                        ),
+                      );*/
                   },
                   child: Container(
                     decoration: BoxDecoration(

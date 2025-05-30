@@ -46,7 +46,7 @@ class AuthProvider with ChangeNotifier {
   /// Indica si el usuario eligió "recordarme".
   bool _rememberMe = false;
 
-///Getters para acceder a los servicios y variables privadas
+  ///Getters para acceder a los servicios y variables privadas
   ApiService get apiService => _apiService;
 
   // Getters públicos
@@ -226,11 +226,8 @@ class AuthProvider with ChangeNotifier {
     required DateTime birthDate,
     String? description,
     required String gender,
-    required String street,
     required String city,
-    required String postalCode,
     required String state,
-    required String country,
   }) async {
     _setLoading(true);
     _errorMessage = null;
@@ -248,11 +245,8 @@ class AuthProvider with ChangeNotifier {
       };
 
       final addressData = {
-        'street': street,
         'city': city,
-        'postalCode': postalCode,
         'state': state,
-        'country': country,
       };
 
       final response = await _apiService.registerClient(
@@ -288,11 +282,8 @@ class AuthProvider with ChangeNotifier {
     required String phone,
     required String description,
     String? website,
-    required String street,
     required String city,
-    required String postalCode,
     required String state,
-    required String country,
   }) async {
     _setLoading(true);
     _errorMessage = null;
@@ -307,11 +298,8 @@ class AuthProvider with ChangeNotifier {
       };
 
       final addressData = {
-        'street': street,
         'city': city,
-        'postalCode': postalCode,
         'state': state,
-        'country': country,
       };
 
       final response = await _apiService.registerBusiness(
@@ -367,11 +355,8 @@ class AuthProvider with ChangeNotifier {
         birthDate: birthDate,
         description: userData['description'],
         gender: userData['gender'],
-        street: addressData['street'],
         city: addressData['city'],
-        postalCode: addressData['postalCode'],
         state: addressData['state'],
-        country: addressData['country'],
       );
     } else if (userType == "BUSINESS") {
       return await registerBusiness(
@@ -381,11 +366,8 @@ class AuthProvider with ChangeNotifier {
         phone: userData['phone'],
         description: userData['description'],
         website: userData['website'],
-        street: addressData['street'],
         city: addressData['city'],
-        postalCode: addressData['postalCode'],
         state: addressData['state'],
-        country: addressData['country'],
       );
     }
     return false;

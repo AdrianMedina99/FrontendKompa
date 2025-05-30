@@ -20,7 +20,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
   ColorNotifire notifier = ColorNotifire();
   late TabController _tabController;
 
-  // Variables para controlar la visibilidad de las contraseñas
   bool _obscureTextClient = true;
   bool _obscureTextBusiness = true;
 
@@ -32,11 +31,8 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _dniController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _streetController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
-  final TextEditingController _postalCodeController = TextEditingController();
   final TextEditingController _stateController = TextEditingController();
-  final TextEditingController _countryController = TextEditingController();
   final TextEditingController _businessNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _websiteController = TextEditingController();
@@ -63,11 +59,8 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
     _lastNameController.dispose();
     _dniController.dispose();
     _phoneController.dispose();
-    _streetController.dispose();
     _cityController.dispose();
-    _postalCodeController.dispose();
     _stateController.dispose();
-    _countryController.dispose();
     _businessNameController.dispose();
     _descriptionController.dispose();
     _websiteController.dispose();
@@ -79,55 +72,244 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
   void _registerUser(BuildContext context) async {
     // Validaciones para CLIENTE
     if (_tabController.index == 0) {
-      if (_emailController.text.isEmpty ||
-          _passwordController.text.isEmpty ||
-          _repeatPasswordController.text.isEmpty ||
-          _nameController.text.isEmpty ||
-          _lastNameController.text.isEmpty ||
-          _dateController.text.isEmpty || // Solo para cliente
-          _dniController.text.isEmpty ||
-          _phoneController.text.isEmpty ||
-          _selectedGender == null ||
-          _streetController.text.isEmpty ||
-          _cityController.text.isEmpty ||
-          _postalCodeController.text.isEmpty ||
-          _stateController.text.isEmpty ||
-          _countryController.text.isEmpty) {
-        _showErrorDialog(context, "Por favor, complete todos los campos obligatorios.");
+      // Validación de campos obligatorios
+      if (_nameController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("El campo nombre es obligatorio"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         return;
       }
-
+      if (_phoneController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("El campo teléfono es obligatorio"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      // Validar formato de teléfono (al menos 9 dígitos)
+      if (!RegExp(r'^[0-9]{9,}$').hasMatch(_phoneController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("El teléfono debe contener al menos 9 dígitos"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      if (_dateController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("La fecha de nacimiento es obligatoria"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
       // Validación de formato de fecha
       try {
         DateFormat('dd/MM/yyyy').parse(_dateController.text);
       } catch (e) {
-        _showErrorDialog(context, "Formato de fecha inválido. Use dd/MM/yyyy.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Formato de fecha inválido. Use dd/MM/yyyy."),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      // Validar DNI si está presente
+      if (_dniController.text.isNotEmpty &&
+          !RegExp(r'^[0-9]{8}[A-Za-z]$').hasMatch(_dniController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("El formato del DNI no es válido"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      // Validar género
+      if (_selectedGender == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Seleccione un género"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      // Validar ciudad y provincia/estado
+      if (_cityController.text.isEmpty || _stateController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Ciudad y provincia/estado son obligatorios"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      // Validar email y contraseñas
+      if (_emailController.text.isEmpty ||
+          _passwordController.text.isEmpty ||
+          _repeatPasswordController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Correo y contraseñas son obligatorios"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(_emailController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Ingrese un correo electrónico válido."),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      if (_passwordController.text.length < 6) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("La contraseña debe tener al menos 6 caracteres."),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      if (_passwordController.text != _repeatPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Las contraseñas no coinciden."),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         return;
       }
     }
 
     // Validaciones para NEGOCIO
     if (_tabController.index == 1) {
-      if (_emailController.text.isEmpty ||
-          _passwordController.text.isEmpty ||
-          _repeatPasswordController.text.isEmpty ||
-          _businessNameController.text.isEmpty ||
-          _phoneController.text.isEmpty ||
-          _websiteController.text.isEmpty ||
-          _streetController.text.isEmpty ||
-          _cityController.text.isEmpty ||
-          _postalCodeController.text.isEmpty ||
-          _stateController.text.isEmpty ||
-          _countryController.text.isEmpty) {
-        _showErrorDialog(context, "Por favor, complete todos los campos obligatorios.");
+      if (_businessNameController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("El nombre de la empresa es obligatorio"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         return;
       }
-    }
-
-    // Validación de contraseñas iguales
-    if (_passwordController.text != _repeatPasswordController.text) {
-      _showErrorDialog(context, "Las contraseñas no coinciden.");
-      return;
+      if (_phoneController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("El campo teléfono es obligatorio"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      // Validar formato de teléfono (al menos 9 dígitos)
+      if (!RegExp(r'^[0-9]{9,}$').hasMatch(_phoneController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("El teléfono debe contener al menos 9 dígitos"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      // Validar sitio web si está presente
+      if (_websiteController.text.isNotEmpty) {
+        final urlPattern = RegExp(
+          r'^(http|https)://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?$',
+          caseSensitive: false,
+        );
+        if (!urlPattern.hasMatch(_websiteController.text)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("La URL del sitio web no es válida"),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return;
+        }
+      }
+      // Validar ciudad y provincia/estado
+      if (_cityController.text.isEmpty || _stateController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Ciudad y provincia/estado son obligatorios"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      // Validar email y contraseñas
+      if (_emailController.text.isEmpty ||
+          _passwordController.text.isEmpty ||
+          _repeatPasswordController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Correo y contraseñas son obligatorios"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(_emailController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Ingrese un correo electrónico válido."),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      if (_passwordController.text.length < 6) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("La contraseña debe tener al menos 6 caracteres."),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      if (_passwordController.text != _repeatPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Las contraseñas no coinciden."),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
     }
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -141,24 +323,23 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
       'apellidos': _lastNameController.text,
       'dni': _dniController.text,
       'phone': _phoneController.text,
-      'description': _descriptionController.text,
+      'description': _descriptionController.text.trim(),
       'gender': _selectedGender,
       'birthDate': DateFormat('dd/MM/yyyy').parse(_dateController.text).toUtc().toIso8601String(),
     }
         : {
       'nombre': _businessNameController.text,
       'phone': _phoneController.text,
-      'description': _descriptionController.text,
+      'description': _descriptionController.text.trim(),
       'website': _websiteController.text,
     };
 
     final addressData = {
-      'street': _streetController.text,
       'city': _cityController.text,
-      'postalCode': _postalCodeController.text,
       'state': _stateController.text,
-      'country': _countryController.text,
     };
+
+    print("Datos a registrar: $userData");
 
     final success = await authProvider.registerUser(
       userType: userType,
@@ -259,8 +440,8 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
         case 'phone':
           if (value.isEmpty) {
             _validationErrors['phone'] = "El teléfono es obligatorio.";
-          } else if (!RegExp(r'^\d{10,}$').hasMatch(value)) {
-            _validationErrors['phone'] = "El teléfono debe contener al menos 10 dígitos.";
+          } else if (!RegExp(r'^\d{9,}$').hasMatch(value)) {
+            _validationErrors['phone'] = "El teléfono debe contener al menos 9 dígitos.";
           } else {
             _validationErrors['phone'] = null;
           }
@@ -459,26 +640,11 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     ),
                   ),
                   AppConstants.Height(height / 50),
-                  // Calle
-                  _buildTextField(
-                    hintText: "Calle y número",
-                    prefixIcon: Icons.home_outlined,
-                    controller: _streetController,
-                  ),
-                  AppConstants.Height(height / 50),
                   // Ciudad
                   _buildTextField(
                     hintText: "Ciudad",
                     prefixIcon: Icons.location_city_outlined,
                     controller: _cityController,
-                  ),
-                  AppConstants.Height(height / 50),
-                  // Código Postal
-                  _buildTextField(
-                    hintText: "Código Postal",
-                    prefixIcon: Icons.markunread_mailbox_outlined,
-                    keyboardType: TextInputType.number,
-                    controller: _postalCodeController,
                   ),
                   AppConstants.Height(height / 50),
                   // Provincia / Estado
@@ -487,14 +653,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     prefixIcon: Icons.map_outlined,
                     controller: _stateController,
                   ),
-                  AppConstants.Height(height / 50),
-                  // País
-                  _buildTextField(
-                    hintText: "País",
-                    prefixIcon: Icons.public_outlined,
-                    controller: _countryController,
-                  ),
-
                   AppConstants.Height(height / 30),
                   // Botón de registro
                   GestureDetector(
@@ -629,13 +787,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     ),
                   ),
                   AppConstants.Height(height / 50),
-                  // Calle
-                  _buildTextField(
-                    hintText: "Calle y número",
-                    prefixIcon: Icons.home_outlined,
-                    controller: _streetController, // Conexión al controlador
-                  ),
-                  AppConstants.Height(height / 50),
                   // Ciudad
                   _buildTextField(
                     hintText: "Ciudad",
@@ -643,26 +794,11 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     controller: _cityController, // Conexión al controlador
                   ),
                   AppConstants.Height(height / 50),
-                  // Código Postal
-                  _buildTextField(
-                    hintText: "Código Postal",
-                    prefixIcon: Icons.markunread_mailbox_outlined,
-                    keyboardType: TextInputType.number,
-                    controller: _postalCodeController, // Conexión al controlador
-                  ),
-                  AppConstants.Height(height / 50),
                   // Provincia / Estado
                   _buildTextField(
                     hintText: "Provincia / Estado",
                     prefixIcon: Icons.map_outlined,
                     controller: _stateController, // Conexión al controlador
-                  ),
-                  AppConstants.Height(height / 50),
-                  // País
-                  _buildTextField(
-                    hintText: "País",
-                    prefixIcon: Icons.public_outlined,
-                    controller: _countryController, // Conexión al controlador
                   ),
                   AppConstants.Height(height / 30),
                   // Botón de registro

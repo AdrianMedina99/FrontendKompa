@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:kompa/providers/CategoryProvider.dart';
+import 'package:kompa/providers/HiloProvider.dart';
 import 'package:kompa/providers/HomeProvider.dart';
 import 'package:kompa/screen/Home/bottom.dart';
 import 'package:kompa/screen/onboarding_screen/splash_screen.dart';
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const apiBaseUrl = 'https://76f8-2a0c-5a80-2305-f700-2dd6-790d-148b-59f4.ngrok-free.app';
+    const apiBaseUrl = 'https://4d28-2a0c-5a80-2305-f700-6947-22b5-e193-da61.ngrok-free.app';
     final apiService = ApiService(baseUrl: apiBaseUrl);
 
     return MultiProvider(
@@ -44,6 +45,9 @@ class MyApp extends StatelessWidget {
           create: (context) => HomeProvider(
             apiService: apiService,
           ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => HiloProvider(apiService),
         ),
       ],
       builder: (context, child) {

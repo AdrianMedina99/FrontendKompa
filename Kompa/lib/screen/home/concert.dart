@@ -10,7 +10,7 @@ import '../../Config/concert 1.dart';
 import '../../dark_mode.dart';
 import 'concert_see_all.dart';
 import 'event.dart';
-import 'event_detail.dart';
+import 'Event_detail.dart';
 
 class Concert extends StatefulWidget {
   const Concert({super.key});
@@ -57,12 +57,12 @@ class _ConcertState extends State<Concert> with SingleTickerProviderStateMixin {
                   children: [
                     InkWell(
                       onTap: () {
-                        Navigator.push(
+                        /*Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => const Event_detail(),
                           ),
-                        );
+                        );*/
                       },
                       child: Container(
                         height: height / 3,
@@ -236,12 +236,12 @@ class _ConcertState extends State<Concert> with SingleTickerProviderStateMixin {
                     AppConstants.Width(width / 30),
                     InkWell(
                       onTap: () {
-                        Navigator.push(
+                       /* Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => const Event_detail(),
                           ),
-                        );
+                        );*/
                       },
                       child: Container(
                         height: height / 3,
@@ -456,12 +456,12 @@ class _ConcertState extends State<Concert> with SingleTickerProviderStateMixin {
                     ),
                     child: InkWell(
                       onTap: () {
-                        Navigator.push(
+                        /*Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => const Event_detail(),
                           ),
-                        );
+                        );*/
                       },
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,

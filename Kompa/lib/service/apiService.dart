@@ -12,7 +12,7 @@ class ApiService {
   void setToken(String? token) {
     _token = token;
   }
-  // Método para obtener headers con autenticación
+  // Obtener headers con autenticación
   Map<String, String> _getHeaders({bool needsAuth = true}) {
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -519,6 +519,119 @@ class ApiService {
     }
   }
 
+  // GESTIÓN DE HILOS
+
+// Crear un nuevo hilo
+  Future<Map<String, dynamic>> createHilo(Map<String, dynamic> hiloData) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/hilos'),
+      headers: _getHeaders(),
+      body: jsonEncode(hiloData),
+    );
+
+    if (response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al crear hilo: ${response.body}');
+    }
+  }
+
+// Obtener un hilo por ID
+  Future<Map<String, dynamic>> getHilo(String id) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/hilos/$id'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener hilo: ${response.body}');
+    }
+  }
+
+// Obtener todos los hilos
+  Future<List<dynamic>> getAllHilos() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/hilos'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener hilos: ${response.body}');
+    }
+  }
+
+// Obtener hilos por ID de evento
+  Future<List<dynamic>> getHilosByEventId(String eventId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/hilos/event/$eventId'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener hilos del evento: ${response.body}');
+    }
+  }
+
+// Obtener respuestas a un hilo
+  Future<List<dynamic>> getRespuestasHilo(String hiloId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/hilos/$hiloId/respuestas'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener respuestas del hilo: ${response.body}');
+    }
+  }
+
+// Actualizar un hilo
+  Future<Map<String, dynamic>> updateHilo(String id, Map<String, dynamic> hiloData) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/api/hilos/$id'),
+      headers: _getHeaders(),
+      body: jsonEncode(hiloData),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al actualizar hilo: ${response.body}');
+    }
+  }
+
+// Eliminar un hilo
+  Future<bool> deleteHilo(String id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/api/hilos/$id'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode == 204) {
+      return true;
+    } else {
+      throw Exception('Error al eliminar hilo: ${response.body}');
+    }
+  }
+
+// Crear un hilo como respuesta a otro
+  Future<Map<String, dynamic>> crearRespuesta(String hiloParentId, String userId, String content, String eventId) async {
+    final hiloData = {
+      'userId': userId,
+      'content': content,
+      'isParent': hiloParentId,
+      'eventId': eventId
+    };
+
+    return await createHilo(hiloData);
+  }
 
 
 }

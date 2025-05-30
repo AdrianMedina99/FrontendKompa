@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../Config/common.dart';
 import '../../dark_mode.dart';
-import 'event_detail.dart';
+import 'Event_detail.dart';
 import 'event.dart';
 
 class See_all extends StatefulWidget {
@@ -63,12 +63,12 @@ class _See_allState extends State<See_all> {
                   padding:  const EdgeInsets.all(10),
                   child: InkWell(
                     onTap: () {
-                      Navigator.push(
+                      /*Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const Event_detail(),
                         ),
-                      );
+                      );*/
                     },
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,

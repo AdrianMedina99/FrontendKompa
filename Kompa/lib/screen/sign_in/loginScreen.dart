@@ -80,14 +80,22 @@ class _WelcomeState extends State<Welcome> {
           MaterialPageRoute(builder: (context) => const BottomBarScreen()),
         );
       } else {
-        setState(() {
-          _errorMessage = authProvider.errorMessage ?? "Error desconocido.";
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage ?? "Error desconocido."),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = "Error al iniciar sesión: $e";
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error al iniciar sesión: $e"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {

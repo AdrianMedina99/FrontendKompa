@@ -108,43 +108,39 @@ class _Edit_ProfileState extends State<Edit_Profile> {
 
         if (!formatosPermitidos.contains(extension)) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Formato no soportado. Por favor usa PNG, SVG, JPG, JPEG, GIF o WEBP."),
-              duration: Duration(seconds: 3),
-            ),
+            const SnackBar(content: Text("Formato no soportado.")),
           );
           return;
         }
 
-        // Verificar el tamaño del archivo (1.5MB como límite para compensar la codificación base64)
         final File file = File(pickedFile.path);
         final int fileSize = await file.length();
-        final int maxSize = (1.5 * 1024 * 1024).toInt(); // 1.5MB en bytes
 
-        print("Tamaño original de la imagen: ${(fileSize / 1024).toStringAsFixed(2)}KB");
+        final int estimatedBase64Size = (fileSize * 1.33).toInt();
+        final int maxSize = 2 * 1024 * 1024;
 
-        if (fileSize > maxSize) {
+        print("Tamaño original: ${fileSize / 1024} KB");
+        print("Tamaño estimado en base64: ${estimatedBase64Size / 1024} KB");
+
+        if (estimatedBase64Size > maxSize) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("La imagen es demasiado grande. El tamaño máximo permitido es 1.5MB."),
+              content: Text("La imagen es demasiado grande incluso después de codificarla."),
+              backgroundColor: Colors.red,
               duration: Duration(seconds: 3),
             ),
           );
           return;
         }
 
-        // Si pasa todas las validaciones, asignar la imagen
         setState(() {
           _profileImage = file;
         });
 
       } catch (e) {
-        print("Error al procesar la imagen: $e");
+        print("Error al procesar imagen: $e");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Error al procesar la imagen: $e"),
-            duration: const Duration(seconds: 3),
-          ),
+          SnackBar(content: Text("Error: $e")),
         );
       }
     }
@@ -201,18 +197,93 @@ class _Edit_ProfileState extends State<Edit_Profile> {
           final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
           try {
-            if (_nameController.text.isEmpty || _phoneController.text.isEmpty) {
+            // Validación de campos obligatorios
+            if (_nameController.text.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Por favor, complete todos los campos obligatorios")),
+                const SnackBar(
+                  content: Text("El campo nombre es obligatorio"),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                ),
               );
               return;
+            }
+
+            if (_phoneController.text.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("El campo teléfono es obligatorio"),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              return;
+            }
+
+            // Validar formato de teléfono
+            if (!RegExp(r'^[0-9]{9,}$').hasMatch(_phoneController.text)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("El teléfono debe contener al menos 9 dígitos"),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              return;
+            }
+
+            // Validaciones específicas para clientes
+            if (widget.userType == "CLIENT") {
+              if (_dateController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("La fecha de nacimiento es obligatoria"),
+                    backgroundColor: Colors.red,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
+
+              // Validar DNI si está presente
+              if (_dniController.text.isNotEmpty &&
+                  !RegExp(r'^[0-9]{8}[A-Za-z]$').hasMatch(_dniController.text)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("El formato del DNI no es válido"),
+                    backgroundColor: Colors.red,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
+            }
+
+            // Validaciones para empresas
+            if (widget.userType == "BUSINESS" && _websiteController.text.isNotEmpty) {
+              final urlPattern = RegExp(
+                r'^(http|https)://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?$',
+                caseSensitive: false,
+              );
+              if (!urlPattern.hasMatch(_websiteController.text)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("La URL del sitio web no es válida"),
+                    backgroundColor: Colors.red,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
             }
 
             Map<String, dynamic> updatedData;
 
             if (widget.userType == "CLIENT") {
               final parsedDate = DateFormat('dd/MM/yyyy').parse(_dateController.text);
-              final formattedDate = parsedDate.toUtc().toIso8601String();
+              final dateOnly = DateTime.utc(parsedDate.year, parsedDate.month, parsedDate.day);
+              final formattedDate = dateOnly.toIso8601String();
+
               updatedData = {
                 ...userData!,
                 'nombre': _nameController.text,

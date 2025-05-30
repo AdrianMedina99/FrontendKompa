@@ -7,7 +7,7 @@ import '../../Config/common.dart';
 import '../../dark_mode.dart';
 import '../../providers/AuthProvider.dart';
 import '../../providers/HomeProvider.dart';
-import 'event_detail.dart';
+import 'Event_detail.dart';
 import 'see_all.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -92,7 +92,7 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const Event_detail(),
+                            builder: (context) => Event_detail(eventId: event['id']),
                           ),
                         );
                       },
