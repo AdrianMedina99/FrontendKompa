@@ -258,12 +258,12 @@ class AuthProvider with ChangeNotifier {
 
       if (response.containsKey('success') && response['success'] == true) {
         return await login(email: email, password: password);
-      } else if (response.containsKey('message') &&
-          response['message'].toString().toLowerCase().contains('registrado correctamente')) {
+      } else if (response.containsKey('laQuedada') &&
+          response['laQuedada'].toString().toLowerCase().contains('registrado correctamente')) {
         // Considera esto como éxito también
         return await login(email: email, password: password);
       } else {
-        _errorMessage = 'Error en el registro: ${response['message'] ?? 'Desconocido'}';
+        _errorMessage = 'Error en el registro: ${response['laQuedada'] ?? 'Desconocido'}';
         return false;
       }
     } catch (e) {
@@ -311,12 +311,12 @@ class AuthProvider with ChangeNotifier {
 
       if (response.containsKey('success') && response['success'] == true) {
         return await login(email: email, password: password);
-      } else if (response.containsKey('message') &&
-          response['message'].toString().toLowerCase().contains('registrado correctamente')) {
+      } else if (response.containsKey('laQuedada') &&
+          response['laQuedada'].toString().toLowerCase().contains('registrado correctamente')) {
         // Considera esto como éxito también
         return await login(email: email, password: password);
       } else {
-        _errorMessage = 'Error en el registro: ${response['message'] ?? 'Desconocido'}';
+        _errorMessage = 'Error en el registro: ${response['laQuedada'] ?? 'Desconocido'}';
         return false;
       }
     } catch (e) {
@@ -403,7 +403,7 @@ class AuthProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data['message'] == 'Usuario ya registrado') {
+        if (data['laQuedada'] == 'Usuario ya registrado') {
           // Usuario ya registrado, proceder con el flujo normal
           print("Usuario ya registrado: ${data['uid']}");
         } else {

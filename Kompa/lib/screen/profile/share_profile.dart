@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_barcodes/barcodes.dart';
 
-import '../../dark_mode.dart';
+import '../../config/dark_mode.dart';
 
 class Share_profile extends StatefulWidget {
   const Share_profile({super.key});

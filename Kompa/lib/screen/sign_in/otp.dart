@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:provider/provider.dart';
-import '../../Config/common.dart';
-import '../../dark_mode.dart';
+import '../../config/AppConstants.dart';
+import '../../config/dark_mode.dart';
 
 class Otp extends StatefulWidget {
   const Otp({super.key});

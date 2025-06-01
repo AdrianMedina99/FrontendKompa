@@ -1,17 +1,18 @@
 // ignore_for_file: file_names
 
-import 'package:kompa/Config/common.dart';
+import 'package:kompa/config/AppConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../dark_mode.dart';
+import '../../config/dark_mode.dart';
 import '../../providers/AuthProvider.dart';
 import '../../providers/CategoryProvider.dart';
 import '../../providers/HomeProvider.dart';
+import '../common/notification.dart';
 import 'HomeCategoriesView.dart';
-import 'all.dart';
+import 'AllScreen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import '../Home/search.dart';
+import 'package:kompa/screen/common/search.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -160,7 +161,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ),
         actions: [
           InkWell(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const notification(),
+                ),
+              );
+            },
             child: Image.asset(
               "assets/notification.png",
               scale: 3,
@@ -312,3 +320,4 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 }
+

@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
-import '../../dark_mode.dart';
+import '../../config/dark_mode.dart';
 import '../../providers/AuthProvider.dart';
 import '../../providers/HomeProvider.dart';
 

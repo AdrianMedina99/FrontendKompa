@@ -4,13 +4,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../Config/common.dart';
-import '../../dark_mode.dart';
+import '../../config/AppConstants.dart';
+import '../../config/dark_mode.dart';
 import '../../providers/HomeProvider.dart';
 import '../../providers/AuthProvider.dart';
 import 'package:geocoding/geocoding.dart';
 
-import 'Event_detail.dart';
+import 'EventDetailScreen.dart';
 
 class HomeCategoriesView extends StatefulWidget {
   final String categoryId;

@@ -1,10 +1,10 @@
 // ignore_for_file: non_constant_identifier_names, camel_case_types, file_names
 
-import 'package:kompa/Config/common.dart';
+import 'package:kompa/config/AppConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../dark_mode.dart';
+import '../../config/dark_mode.dart';
 
 class List_friend extends StatefulWidget {
   const List_friend({super.key});

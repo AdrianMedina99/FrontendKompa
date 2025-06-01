@@ -1,10 +1,10 @@
 // ignore_for_file: file_names, camel_case_types
 
-import 'package:kompa/Config/common.dart';
+import 'package:kompa/config/AppConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../dark_mode.dart';
+import '../../config/dark_mode.dart';
 
 class Event_organizer extends StatefulWidget {
   const Event_organizer({super.key});

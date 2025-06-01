@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../dark_mode.dart';
-import '../../Config/common.dart';
+import '../../config/dark_mode.dart';
 
 class ReviewsScreen extends StatefulWidget {
   const ReviewsScreen({Key? key}) : super(key: key);

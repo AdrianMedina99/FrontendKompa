@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../Config/common.dart';
-import '../../dark_mode.dart';
+import '../../config/AppConstants.dart';
+import '../../config/dark_mode.dart';
 import '../../providers/CategoryProvider.dart';
 import '../../providers/AuthProvider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../Home/search.dart';
+import '../common/search.dart';
 import 'CategoryDetail.dart';
 
 class CategoryScreen extends StatefulWidget {

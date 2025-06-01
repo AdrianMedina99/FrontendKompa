@@ -3,12 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../dark_mode.dart';
+import '../../config/dark_mode.dart';
 import '../../providers/HomeProvider.dart';
 import '../../providers/AuthProvider.dart';
-import '../Home/Event_detail.dart';
-import '../home/search.dart';
+import '../Home/EventDetailScreen.dart';
 import 'package:geocoding/geocoding.dart';
+import '../common/search.dart';
 import 'EventForm.dart';
 
 class CategoryDetail extends StatefulWidget {
