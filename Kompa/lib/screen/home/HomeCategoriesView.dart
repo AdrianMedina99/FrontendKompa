@@ -136,17 +136,27 @@ class _HomeCategoriesViewState extends State<HomeCategoriesView> with SingleTick
                   itemCount: trendingEvents.length,
                   itemBuilder: (_, index) {
                     final event = trendingEvents[index];
-                    return eventCard(
-                      image: event['photo'],
-                      name: event['title'],
-                      time: event['startDate']?['seconds'] != null
-                          ? DateTime.fromMillisecondsSinceEpoch(
-                          event['startDate']['seconds'] * 1000)
-                          .toIso8601String()
-                          : null,
-                      location: event['location'],
-                      lat: event['latitud'],
-                      lng: event['longitud'],
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Event_detail(eventId: event['id']),
+                          ),
+                        );
+                      },
+                      child: eventCard(
+                        image: event['photo'],
+                        name: event['title'],
+                        time: event['startDate']?['seconds'] != null
+                            ? DateTime.fromMillisecondsSinceEpoch(
+                                event['startDate']['seconds'] * 1000)
+                                .toIso8601String()
+                            : null,
+                        location: event['location'],
+                        lat: event['latitud'],
+                        lng: event['longitud'],
+                      ),
                     );
                   },
                 )
@@ -172,7 +182,7 @@ class _HomeCategoriesViewState extends State<HomeCategoriesView> with SingleTick
         formattedTime = DateFormat("dd-MM-yyyy 'a las' HH:mm").format(dateTime);
       } catch (_) {}
     }
-
+    
     Widget locationWidget;
     if (location != null && !location.startsWith('(')) {
       locationWidget = Text(location, style: const TextStyle(fontSize: 13));
@@ -187,91 +197,74 @@ class _HomeCategoriesViewState extends State<HomeCategoriesView> with SingleTick
         },
       );
     } else {
-      locationWidget = const Text('Ubicación no disponible', style: const TextStyle(fontSize: 13));
+      locationWidget = const Text('Ubicación no disponible', style: TextStyle(fontSize: 13));
     }
-
-    return InkWell(
-      onTap: () {
-        final event = _filteredEvents.firstWhere(
-              (e) => e['title'] == name && e['photo'] == image,
-          orElse: () => {},
-        );
-
-        if (event.isNotEmpty && event['id'] != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => Event_detail(eventId: event['id']),
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: notifier.backGround,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: notifier.inv.withOpacity(0.12),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
-          );
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: notifier.backGround,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: notifier.inv.withOpacity(0.12),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 100,
+                width: 100,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  image: DecorationImage(
+                    image: image != null && image.isNotEmpty
+                        ? NetworkImage(image)
+                        : const NetworkImage('https://via.placeholder.com/150'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name ?? 'Sin título',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: notifier.inv,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      formattedTime,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: notifier.inv,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    DefaultTextStyle(
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: notifier.inv,
+                      ),
+                      child: locationWidget,
+                    ),
+                  ],
+                ),
               ),
             ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    image: DecorationImage(
-                      image: image != null && image.isNotEmpty
-                          ? NetworkImage(image)
-                          : const NetworkImage('https://via.placeholder.com/150'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name ?? 'Sin título',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: notifier.inv,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        formattedTime,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: notifier.inv,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      DefaultTextStyle(
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: notifier.inv,
-                        ),
-                        child: locationWidget,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

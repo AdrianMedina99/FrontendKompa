@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const apiBaseUrl = 'https://4d28-2a0c-5a80-2305-f700-6947-22b5-e193-da61.ngrok-free.app';
+    const apiBaseUrl = 'https://1bca-2a0c-5a80-2600-6a00-902a-bd53-cb0c-455b.ngrok-free.app';
     final apiService = ApiService(baseUrl: apiBaseUrl);
 
     return MultiProvider(

@@ -316,7 +316,42 @@ class _HiloState extends State<Hilo> {
                     IconButton(
                       icon: Icon(Icons.delete, color: notifier.buttonColor, size: 24),
                       onPressed: () async {
-                        await hiloProvider.deleteHilo(postId);
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              backgroundColor: notifier.containerColor,
+                              title: Text(
+                                "Confirmación",
+                                style: TextStyle(color: notifier.textColor),
+                              ),
+                              content: Text(
+                                "¿Seguro que quieres borrar este post?",
+                                style: TextStyle(color: notifier.textColor),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(false),
+                                  child: Text(
+                                    "Cancelar",
+                                    style: TextStyle(color: notifier.buttonColor),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(true),
+                                  child: Text(
+                                    "Eliminar",
+                                    style: TextStyle(color: notifier.buttonColor),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (confirm == true) {
+                          await hiloProvider.deleteHilo(postId);
+                        }
                       },
                       tooltip: "Eliminar post",
                     ),

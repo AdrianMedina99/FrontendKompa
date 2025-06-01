@@ -236,15 +236,25 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
                 itemCount: trendingEvents.length,
                 itemBuilder: (_, index) {
                   final event = trendingEvents[index];
-                  return trendingEventCard(
-                    image: event['photo'],
-                    name: event['title'],
-                    time: event['startDate']?['seconds'] != null
-                        ? DateTime.fromMillisecondsSinceEpoch(event['startDate']['seconds'] * 1000).toIso8601String()
-                        : null,
-                    location: event['location'],
-                    lat: event['latitud'],
-                    lng: event['longitud'],
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Event_detail(eventId: event['id']),
+                        ),
+                      );
+                    },
+                    child: trendingEventCard(
+                      image: event['photo'],
+                      name: event['title'],
+                      time: event['startDate']?['seconds'] != null
+                          ? DateTime.fromMillisecondsSinceEpoch(event['startDate']['seconds'] * 1000).toIso8601String()
+                          : null,
+                      location: event['location'],
+                      lat: event['latitud'],
+                      lng: event['longitud'],
+                    ),
                   );
                 },
               )
@@ -368,3 +378,4 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
   }
 
 }
+

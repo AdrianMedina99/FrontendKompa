@@ -518,12 +518,12 @@ class _profileState extends State<profile> {
 
                 return InkWell(
                   onTap: () {
-                    /*Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Event_detail(),
-                        ),
-                      );*/
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Event_detail(eventId: event['id']),
+                      ),
+                    );
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -731,4 +731,3 @@ class _profileState extends State<profile> {
     }
   }
 }
-

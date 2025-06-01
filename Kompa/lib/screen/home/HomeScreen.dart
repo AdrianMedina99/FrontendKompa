@@ -26,7 +26,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   int currentIndex = 0;
   ColorNotifire notifier = ColorNotifire();
   late Future<void> _fetchFuture;
-  bool _showedWelcomeMessage = false; // Control de visualización del snackbar
+  bool _showedWelcomeMessage = false; 
 
   @override
   void initState() {
@@ -42,14 +42,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
         authProvider.updateUserDataState(userData);
 
-        // Mostrar el mensaje de bienvenida después de obtener el nombre del usuario
+        // Mensaje de bienvenida después de obtener el nombre del usuario
         if (!_showedWelcomeMessage && mounted) {
           _showedWelcomeMessage = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Bienvenido, $_userName'),
-                backgroundColor: const Color(0xff4CAF50), // Color verde para notificaciones exitosas
+                backgroundColor: const Color(0xff4CAF50),
                 behavior: SnackBarBehavior.floating,
                 duration: const Duration(seconds: 3),
               ),

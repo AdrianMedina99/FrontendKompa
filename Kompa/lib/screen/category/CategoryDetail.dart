@@ -3,13 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../Config/common.dart';
 import '../../dark_mode.dart';
 import '../../providers/HomeProvider.dart';
 import '../../providers/AuthProvider.dart';
+import '../Home/Event_detail.dart';
 import '../home/search.dart';
 import 'package:geocoding/geocoding.dart';
-
 import 'EventForm.dart';
 
 class CategoryDetail extends StatefulWidget {
@@ -282,17 +281,27 @@ class _CategoryDetailState extends State<CategoryDetail> {
                   }
 
                   final event = _filteredEvents[index];
-                  return eventCard(
-                    image: event['photo'],
-                    name: event['title'],
-                    time: event['startDate']?['seconds'] != null
-                        ? DateTime.fromMillisecondsSinceEpoch(
-                        event['startDate']['seconds'] * 1000)
-                        .toIso8601String()
-                        : null,
-                    location: event['location'],
-                    lat: event['latitud'],
-                    lng: event['longitud'],
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Event_detail(eventId: event['id']),
+                        ),
+                      );
+                    },
+                    child: eventCard(
+                      image: event['photo'],
+                      name: event['title'],
+                      time: event['startDate']?['seconds'] != null
+                          ? DateTime.fromMillisecondsSinceEpoch(
+                          event['startDate']['seconds'] * 1000)
+                          .toIso8601String()
+                          : null,
+                      location: event['location'],
+                      lat: event['latitud'],
+                      lng: event['longitud'],
+                    ),
                   );
                 },
               ),
@@ -439,3 +448,4 @@ class _CategoryDetailState extends State<CategoryDetail> {
     return 'Ciudad desconocida';
   }
 }
+
