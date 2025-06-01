@@ -8,7 +8,7 @@ import '../../providers/HomeProvider.dart';
 import '../../providers/AuthProvider.dart';
 import '../Home/EventDetailScreen.dart';
 import 'package:geocoding/geocoding.dart';
-import '../common/search.dart';
+import '../common/SearchScreen.dart';
 import 'EventForm.dart';
 
 class CategoryDetail extends StatefulWidget {
@@ -345,7 +345,7 @@ class _CategoryDetailState extends State<CategoryDetail> {
     String formattedTime = 'Fecha no disponible';
     if (time != null) {
       try {
-        DateTime dateTime = DateTime.parse(time);
+        DateTime dateTime = DateTime.parse(time).toUtc().toLocal();
         formattedTime = DateFormat("dd-MM-yyyy 'a las' HH:mm").format(dateTime);
       } catch (_) {}
     }
@@ -448,4 +448,3 @@ class _CategoryDetailState extends State<CategoryDetail> {
     return 'Ciudad desconocida';
   }
 }
-

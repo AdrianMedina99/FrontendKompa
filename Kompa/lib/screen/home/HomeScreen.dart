@@ -12,7 +12,7 @@ import 'HomeCategoriesView.dart';
 import 'AllScreen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:kompa/screen/common/search.dart';
+import 'package:kompa/screen/common/SearchScreen.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

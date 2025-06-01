@@ -6,7 +6,7 @@ import '../../providers/CategoryProvider.dart';
 import '../../providers/AuthProvider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../common/search.dart';
+import '../common/SearchScreen.dart';
 import 'CategoryDetail.dart';
 
 class CategoryScreen extends StatefulWidget {

@@ -1,5 +1,4 @@
 // ignore_for_file: file_names, use_build_context_synchronously
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -392,19 +391,24 @@ class _EventFormState extends State<EventForm> {
       final homeProvider = Provider.of<HomeProvider>(context, listen: false);
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-      // Obtener datos del usuario actual
-      final userData = await authProvider.getCurrentUserData();
+      // Obtener la ID del usuario logeado
+      final userId = authProvider.userId;
 
       // Subir la imagen primero y obtener la URL
       final String photoUrl = await homeProvider.apiService.uploadEventImage(_imageFile!);
+
+      // Formatear fechas como espera el backend
+      final dateFormatter = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      final String formattedStartDate = dateFormatter.format(_startDate.toUtc());
+      final String formattedEndDate = dateFormatter.format(_endDate.toUtc());
 
       // Crear el objeto de evento
       final eventData = {
         'title': _titleController.text,
         'description': _descriptionController.text,
         'photo': photoUrl,
-        'startDate': _startDate.toIso8601String(),
-        'endDate': _endDate.toIso8601String(),
+        'startDate': formattedStartDate,
+        'endDate': formattedEndDate,
         'capacity': int.tryParse(_capacityController.text) ?? 0,
         'language': _languageController.text,
         'ageRestriction': _edadController.text,
@@ -412,7 +416,7 @@ class _EventFormState extends State<EventForm> {
         'longitud': _longitude,
         'location': _addressText,
         'categoryId': widget.categoryId,
-        'businessId': userData['id'],  // El ID del creador se asigna automáticamente
+        'createFor': userId, // Asignar la ID del usuario logeado
       };
 
       // Enviar los datos al servidor
@@ -796,3 +800,4 @@ class _EventFormState extends State<EventForm> {
     );
   }
 }
+

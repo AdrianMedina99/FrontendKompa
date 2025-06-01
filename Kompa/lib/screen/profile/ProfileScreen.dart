@@ -564,7 +564,7 @@ class _profileState extends State<profile> {
                           Text(
                             event['title'] ?? "Sin título",
                             style: TextStyle(
-                              color: notifier.inv ,
+                              color: Colors.white ,
                               fontWeight: FontWeight.w600,
                               fontSize: 18,
                             ),

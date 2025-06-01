@@ -1,11 +1,13 @@
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
+import 'package:kompa/screen/profile/AboutUs.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/dark_mode.dart';
 import '../../providers/AuthProvider.dart';
 import 'EditProfileScreen.dart';
+import 'PrivacyPolicy.dart';
 import 'list_friend.dart';
 import '../paymentGateway/payment_card.dart';
 import '../sign_in/LoginScreen.dart';
@@ -91,13 +93,13 @@ class _SettingState extends State<Setting> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const List_friend(),
+                  builder: (context) => const PrivacyPolicyScreen(),
                 ),
               );
             },
             child: accountDetails(
-              image: "assets/Profile Bottom.png",
-              name: "Lista de Amigos",
+              image: "assets/Lock.png",
+              name: "Políticas de Privacidad",
               icon: "assets/arrow-right.png",
               onPress: () {},
             ),
@@ -107,13 +109,13 @@ class _SettingState extends State<Setting> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const Payment_card(),
+                  builder: (context) => const AboutUs(),
                 ),
               );
             },
             child: accountDetails(
-              image: "assets/card.png",
-              name: "Metodo de Pago",
+              image: "assets/Profile Bottom.png",
+              name: "Sobre Nosotros",
               icon: "assets/arrow-right.png",
               onPress: () {},
             ),

@@ -2,7 +2,7 @@
 
 
 import 'package:flutter/material.dart';
-import 'package:kompa/screen/common/search.dart';
+import 'package:kompa/screen/common/SearchScreen.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/AppConstants.dart';

@@ -21,6 +21,13 @@ class HomeProvider with ChangeNotifier {
   String? get currentCategoryId => _currentCategoryId;
   List<Map<String, dynamic>> get nearbyEvents => _nearbyEvents;
   List<Map<String, dynamic>> get trendingEvents => _trendingEvents;
+
+  // Agregamos un setter para trendingEvents
+  set trendingEvents(List<Map<String, dynamic>> events) {
+    _trendingEvents = events;
+    notifyListeners();
+  }
+
   bool get isLoading => _isLoading;
   Position? get lastKnownPosition => _lastKnownPosition;
 
@@ -164,3 +171,4 @@ class HomeProvider with ChangeNotifier {
     _allEventsLoaded = false;
   }
 }
+
