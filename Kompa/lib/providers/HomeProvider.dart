@@ -6,10 +6,12 @@ import 'dart:convert';
 import 'AuthProvider.dart';
 
 class HomeProvider with ChangeNotifier {
-  // Variables
+
+  // ============================
+  // Variables privadas y getters
+  // ============================
   final ApiService apiService;
   AuthProvider? _authProvider;
-
   List<Map<String, dynamic>> _nearbyEvents = [];
   List<Map<String, dynamic>> _trendingEvents = [];
   bool _isLoading = false;
@@ -22,7 +24,7 @@ class HomeProvider with ChangeNotifier {
   List<Map<String, dynamic>> get nearbyEvents => _nearbyEvents;
   List<Map<String, dynamic>> get trendingEvents => _trendingEvents;
 
-  // Agregamos un setter para trendingEvents
+  /// Agregamos un setter para trendingEvents
   set trendingEvents(List<Map<String, dynamic>> events) {
     _trendingEvents = events;
     notifyListeners();

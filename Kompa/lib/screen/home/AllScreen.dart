@@ -19,6 +19,10 @@ class All extends StatefulWidget {
 }
 
 class _AllState extends State<All> with SingleTickerProviderStateMixin {
+
+  //=============
+  // Variables
+  //=============
   late AnimationController _controller;
   ColorNotifire notifier = ColorNotifire();
   bool _initialized = false;
@@ -44,6 +48,7 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
     }
   }
 
+  /// Metodo para obtener eventos cercanos y populares
   Future<void> _fetchEvents() async {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
     try {
@@ -52,18 +57,29 @@ class _AllState extends State<All> with SingleTickerProviderStateMixin {
 
       await homeProvider.fetchAllEvents(position.latitude, position.longitude);
     } catch (e) {
-      // Manejo de errores
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al obtener eventos: $e'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+
+    //==============
+    // Providers
+    //==============
     notifier = Provider.of<ColorNotifire>(context, listen: true);
     final homeProvider = Provider.of<HomeProvider>(context);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
     homeProvider.setAuthProvider(authProvider);
 
+    //================
+    // Variables
+    //================
     final nearbyEvents = homeProvider.nearbyEvents;
     final trendingEvents = homeProvider.trendingEvents;
     final isBusinessUser = homeProvider.isBusinessUser;

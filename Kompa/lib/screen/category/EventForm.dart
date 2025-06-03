@@ -13,6 +13,10 @@ import '../../providers/AuthProvider.dart';
 import '../../providers/HomeProvider.dart';
 
 class EventForm extends StatefulWidget {
+
+  // ===========
+  // Variables
+  // ===========
   final String categoryId;
   final String categoryTitle;
 
@@ -30,7 +34,6 @@ class _EventFormState extends State<EventForm> {
   final _formKey = GlobalKey<FormState>();
   late ColorNotifire notifier;
 
-  // Controladores para los campos del formulario
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _capacityController = TextEditingController();
@@ -38,11 +41,9 @@ class _EventFormState extends State<EventForm> {
   final TextEditingController _edadController = TextEditingController();
   final TextEditingController _searchLocationController = TextEditingController();
 
-  // Variables para manejar fechas
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(hours: 2));
 
-  // Variables para ubicación
   double? _latitude;
   double? _longitude;
   String _addressText = "Selecciona una ubicación en el mapa";
@@ -52,18 +53,15 @@ class _EventFormState extends State<EventForm> {
   Set<Marker> _markers = {};
   GoogleMapController? _mapController;
 
-  // Manejo de errores y estado de carga
   bool _isLoading = false;
   String _errorMessage = '';
 
-  // Imagen del evento
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    // Obtener una ubicación inicial para centrar el mapa
     _initializeLocation();
   }
 
@@ -79,14 +77,13 @@ class _EventFormState extends State<EventForm> {
     super.dispose();
   }
 
-  // Método para inicializar la ubicación para el mapa
+  /// Metodo para inicializar la ubicación para el mapa
   Future<void> _initializeLocation() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Verificar permisos de ubicación
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -98,8 +95,6 @@ class _EventFormState extends State<EventForm> {
       if (permission == LocationPermission.deniedForever) {
         throw 'Los permisos de ubicación están permanentemente denegados';
       }
-
-      // Obtener la posición actual solo para inicializar el mapa
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high
       );
@@ -122,7 +117,7 @@ class _EventFormState extends State<EventForm> {
     }
   }
 
-  // Método para buscar una ubicación por texto
+  /// Metodo para buscar una ubicación por texto
   Future<void> _searchLocation() async {
     final searchText = _searchLocationController.text.trim();
     if (searchText.isEmpty) return;
@@ -135,12 +130,9 @@ class _EventFormState extends State<EventForm> {
       List<Location> locations = await locationFromAddress(searchText);
       if (locations.isNotEmpty) {
         final location = locations.first;
-        
-        // Actualizar la ubicación en el mapa
         final newLatLng = LatLng(location.latitude, location.longitude);
         _mapController?.animateCamera(CameraUpdate.newLatLngZoom(newLatLng, 14));
         
-        // Actualizar marcador y guardar coordenadas
         setState(() {
           _latitude = location.latitude;
           _longitude = location.longitude;
@@ -151,7 +143,6 @@ class _EventFormState extends State<EventForm> {
           ));
         });
         
-        // Obtener la dirección completa para mostrarla
         await _getAddressFromLatLng(location.latitude, location.longitude);
       } else {
         setState(() {
@@ -169,6 +160,7 @@ class _EventFormState extends State<EventForm> {
     }
   }
 
+  /// Metodo para seleccionar una imagen desde la galería
   Future<void> _selectImage() async {
     final XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,
@@ -183,6 +175,7 @@ class _EventFormState extends State<EventForm> {
     }
   }
 
+  /// Metodo para seleccionar fecha y hora
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -210,7 +203,6 @@ class _EventFormState extends State<EventForm> {
 
           if (isStartDate) {
             _startDate = newDateTime;
-            // Si la fecha de fin es anterior a la nueva fecha de inicio, actualizamos la fecha de fin
             if (_endDate.isBefore(_startDate)) {
               _endDate = _startDate.add(const Duration(hours: 2));
             }
@@ -235,8 +227,6 @@ class _EventFormState extends State<EventForm> {
           ),
         ),
         const SizedBox(height: 8),
-        
-        // Añadimos el campo para buscar ubicaciones
         Row(
           children: [
             Expanded(
@@ -284,7 +274,6 @@ class _EventFormState extends State<EventForm> {
           ),
           child: Stack(
             children: [
-              // Mapa donde el usuario puede elegir ubicación
               ClipRRect(
                 borderRadius: BorderRadius.circular(14),
                 child: GoogleMap(
@@ -308,12 +297,10 @@ class _EventFormState extends State<EventForm> {
                   myLocationEnabled: true,
                   myLocationButtonEnabled: true,
                   onMapCreated: (controller) {
-                    // Guardamos el controlador para poder manipular el mapa después
                     _mapController = controller;
                   },
                 ),
               ),
-              // Instrucción para el usuario
               Positioned(
                 top: 8,
                 left: 8,
@@ -344,7 +331,7 @@ class _EventFormState extends State<EventForm> {
     );
   }
 
-  // Método para obtener la dirección a partir de coordenadas
+  /// Metodo para obtener la dirección a partir de coordenadas
   Future<void> _getAddressFromLatLng(double lat, double lng) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
@@ -363,6 +350,7 @@ class _EventFormState extends State<EventForm> {
     }
   }
 
+  /// Metodo para enviar el formulario
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -391,18 +379,14 @@ class _EventFormState extends State<EventForm> {
       final homeProvider = Provider.of<HomeProvider>(context, listen: false);
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-      // Obtener la ID del usuario logeado
       final userId = authProvider.userId;
 
-      // Subir la imagen primero y obtener la URL
       final String photoUrl = await homeProvider.apiService.uploadEventImage(_imageFile!);
 
-      // Formatear fechas como espera el backend
       final dateFormatter = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
       final String formattedStartDate = dateFormatter.format(_startDate.toUtc());
       final String formattedEndDate = dateFormatter.format(_endDate.toUtc());
 
-      // Crear el objeto de evento
       final eventData = {
         'title': _titleController.text,
         'description': _descriptionController.text,
@@ -416,13 +400,11 @@ class _EventFormState extends State<EventForm> {
         'longitud': _longitude,
         'location': _addressText,
         'categoryId': widget.categoryId,
-        'createFor': userId, // Asignar la ID del usuario logeado
+        'createFor': userId,
       };
 
-      // Enviar los datos al servidor
       await homeProvider.apiService.createEvent(eventData);
 
-      // Navegar hacia atrás con un mensaje de éxito
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Evento creado exitosamente')),
       );
@@ -468,7 +450,6 @@ class _EventFormState extends State<EventForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Selector de imagen
               InkWell(
                 onTap: _selectImage,
                 child: Container(
@@ -509,8 +490,6 @@ class _EventFormState extends State<EventForm> {
               ),
 
               const SizedBox(height: 24),
-
-              // Campo de título
               Text(
                 "Título del evento",
                 style: TextStyle(
@@ -546,8 +525,6 @@ class _EventFormState extends State<EventForm> {
               ),
 
               const SizedBox(height: 16),
-
-              // Campo de descripción
               Text(
                 "Descripción",
                 style: TextStyle(
@@ -584,8 +561,6 @@ class _EventFormState extends State<EventForm> {
               ),
 
               const SizedBox(height: 16),
-
-              // Selector de fecha de inicio
               Text(
                 "Fecha y hora de inicio",
                 style: TextStyle(
@@ -622,8 +597,6 @@ class _EventFormState extends State<EventForm> {
               ),
 
               const SizedBox(height: 16),
-
-              // Selector de fecha de fin
               Text(
                 "Fecha y hora de finalización",
                 style: TextStyle(
@@ -660,8 +633,6 @@ class _EventFormState extends State<EventForm> {
               ),
 
               const SizedBox(height: 16),
-
-              // Campo de capacidad
               Text(
                 "Capacidad",
                 style: TextStyle(
@@ -692,8 +663,6 @@ class _EventFormState extends State<EventForm> {
               ),
 
               const SizedBox(height: 16),
-
-              // Campo de idioma
               Text(
                 "Idioma",
                 style: TextStyle(
@@ -723,8 +692,6 @@ class _EventFormState extends State<EventForm> {
               ),
 
               const SizedBox(height: 16),
-
-              // Campo de restricción de edad
               Text(
                 "Restricción de edad",
                 style: TextStyle(
@@ -752,10 +719,8 @@ class _EventFormState extends State<EventForm> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 24),
 
-              // Selector de ubicación en el mapa
               _buildLocationSelector(),
 
               if (_errorMessage.isNotEmpty)
@@ -766,10 +731,7 @@ class _EventFormState extends State<EventForm> {
                     style: const TextStyle(color: Colors.red, fontSize: 14),
                   ),
                 ),
-
               SizedBox(height: height / 20),
-
-              // Botón de envío
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

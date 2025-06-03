@@ -9,8 +9,12 @@ import '../../providers/HomeProvider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../home/HiloScreen.dart';
+import '../profile/OtherProfileScreen.dart';
 
 class Event_detail extends StatefulWidget {
+  //===========
+  // Variables
+  //===========
   final String eventId;
 
   const Event_detail({
@@ -23,6 +27,9 @@ class Event_detail extends StatefulWidget {
 }
 
 class _Event_detailState extends State<Event_detail> {
+  //===========
+  // Variables
+  //===========
   Map<String, dynamic>? eventData;
   Map<String, dynamic>? creatorData;
   Map<String, dynamic>? categoryData;
@@ -36,25 +43,22 @@ class _Event_detailState extends State<Event_detail> {
     _loadEventData();
   }
 
+  ///Metodo para cargar los datos del evento
   Future<void> _loadEventData() async {
     final apiService = Provider.of<HomeProvider>(context, listen: false).apiService;
 
     try {
-      // Cargar datos del evento
       final data = await apiService.getEventById(widget.eventId);
       setState(() {
         eventData = data;
       });
 
-      // Cargar datos del creador
       if (eventData != null && eventData!['createFor'] != null) {
         final creatorId = eventData!['createFor'];
         try {
-          // Intentar cargar como usuario de negocio
           creatorData = await apiService.getBusinessUser(creatorId);
         } catch (e) {
           try {
-            // Si falla, intentar cargar como usuario cliente
             creatorData = await apiService.getClientUser(creatorId);
           } catch (e) {
             print('No se pudo cargar la información del creador');
@@ -62,7 +66,6 @@ class _Event_detailState extends State<Event_detail> {
         }
       }
 
-      // Cargar datos de la categoría
       if (eventData != null && eventData!['categoryId'] != null) {
         try {
           categoryData = await apiService.getCategoryById(eventData!['categoryId']);
@@ -71,7 +74,6 @@ class _Event_detailState extends State<Event_detail> {
         }
       }
 
-      // Obtener nombre de la ubicación basado en coordenadas
       if (eventData != null && eventData!['latitud'] != null && eventData!['longitud'] != null) {
         try {
           List<Placemark> placemarks = await placemarkFromCoordinates(
@@ -108,8 +110,8 @@ class _Event_detailState extends State<Event_detail> {
         leading: IconButton(
           icon: Image.asset(
             "assets/arrow-left.png",
-            width: 28, // Cambiado de 20 a 28
-            height: 28, // Cambiado de 20 a 28
+            width: 28,
+            height: 28,
             color: notifier.textColor,
           ),
           onPressed: () {
@@ -248,12 +250,25 @@ class _Event_detailState extends State<Event_detail> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                creatorData?['nombre'] ?? 'Creador desconocido',
-                                style: TextStyle(
-                                  color: notifier.textColor,
-                                  fontSize: 16,
-                                  fontFamily: "Ariom-Regular",
+                              GestureDetector(
+                                onTap: () {
+                                  if (creatorData != null && creatorData!['id'] != null) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => OtherProfileScreen(userId: creatorData!['id']),
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: Text(
+                                  creatorData?['nombre'] ?? 'Creador desconocido',
+                                  style: TextStyle(
+                                    color: notifier.textColor,
+                                    fontSize: 16,
+                                    fontFamily: "Ariom-Regular",
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                               ),
                               Text(
@@ -381,7 +396,7 @@ class _Event_detailState extends State<Event_detail> {
                           ),
                         ),
                         Positioned(
-                          right: 16,
+                          left: 16,
                           bottom: 16,
                           child: FloatingActionButton(
                             mini: true,

@@ -1,6 +1,5 @@
 // ignore_for_file: file_names
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kompa/config/AppConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +18,9 @@ class Welcome extends StatefulWidget {
 }
 
 class _WelcomeState extends State<Welcome> {
+  //==========
+  // Variables
+  //==========
   ColorNotifire notifier = ColorNotifire();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -34,6 +36,7 @@ class _WelcomeState extends State<Welcome> {
     _checkRememberMe();
   }
 
+  ///Metodo para verificar si el usuario ha seleccionado "Recordar contraseña"
   Future<void> _checkRememberMe() async {
     final authProvider = Provider.of<auth.AuthProvider>(context, listen: false);
     if (authProvider.rememberMe && authProvider.isAuthenticated) {
@@ -51,6 +54,7 @@ class _WelcomeState extends State<Welcome> {
     super.dispose();
   }
 
+  ///Metodo para iniciar sesión
   Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();

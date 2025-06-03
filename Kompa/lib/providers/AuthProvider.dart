@@ -12,41 +12,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../service/SharedPreferencesService.dart';
 
 class AuthProvider with ChangeNotifier {
+
   // ============================
   // Variables privadas y getters
   // ============================
 
-  /// Servicio de API para autenticación y datos de usuario.
   final ApiService _apiService;
-
-  /// Indica si el usuario está autenticado.
   bool _isAuthenticated = false;
-
-  /// Indica si hay una operación de carga en curso.
   bool _isLoading = false;
-
-  /// Token JWT de autenticación.
   String? _token;
-
-  /// Tipo de usuario ("CLIENT" o "BUSINESS").
   String? _userType;
-
-  /// Email del usuario autenticado.
   String? _email;
-
-  /// ID del usuario autenticado.
   String? _userId;
-
-  /// Datos del usuario autenticado.
   Map<String, dynamic>? _userData;
-
-  /// Último mensaje de error.
   String? _errorMessage;
-
-  /// Indica si el usuario eligió "recordarme".
   bool _rememberMe = false;
-
-  ///Getters para acceder a los servicios y variables privadas
   ApiService get apiService => _apiService;
 
   // Getters públicos
@@ -60,7 +40,6 @@ class AuthProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get rememberMe => _rememberMe;
 
-  /// Constructor que inicializa el servicio de API.
   AuthProvider({required String apiBaseUrl}) : _apiService = ApiService(baseUrl: apiBaseUrl);
 
   // ============================
@@ -83,33 +62,27 @@ class AuthProvider with ChangeNotifier {
 
       print("Respuesta de login: $response");
 
-      // Verificar que el campo token exista
       if (!response.containsKey('token') || response['token'] == null) {
         _errorMessage = 'Error: No se recibió un token de autenticación';
         return false;
       }
 
-      // Usar el JWT token
       _token = response['token'];
       _userId = response['uid'];
       _userType = response['userType'];
       _email = response['email'] ?? email;
       _isAuthenticated = true;
 
-      // Guardar el refreshToken si está disponible
       if (response.containsKey('refreshToken')) {
         await SharedPreferencesService.saveString('refreshToken', response['refreshToken']);
       }
 
-      // Configurar token en ApiService
       _apiService.setToken(_token);
 
-      // Cargar datos del usuario
       if (_userId != null && _userType != null) {
         await _loadUserData();
       }
 
-      // Guardar datos de autenticación
       await _saveAuthData();
 
       notifyListeners();
@@ -134,21 +107,18 @@ class AuthProvider with ChangeNotifier {
     }
 
     try {
-      // Validar el token con la API
       final isValid = await validateToken(token);
 
       if (isValid) {
         _token = token;
         _isAuthenticated = true;
 
-        // Usar SharedPreferences para obtener los datos guardados
         _userId = await SharedPreferencesService.getString('userId');
         _userType = await SharedPreferencesService.getString('userType');
         _email = await SharedPreferencesService.getString('email');
         _userData = await SharedPreferencesService.getMap('userData');
         _rememberMe = rememberMe;
 
-        // Configurar el token en ApiService
         _apiService.setToken(token);
 
         notifyListeners();
@@ -215,7 +185,7 @@ class AuthProvider with ChangeNotifier {
   // Sección: Registro de usuarios
   // ============================
 
-  /// Registra un nuevo cliente y realiza login automático si tiene éxito.
+  /// Registra un nuevo cliente
   Future<bool> registerClient({
     required String email,
     required String password,
@@ -260,7 +230,6 @@ class AuthProvider with ChangeNotifier {
         return await login(email: email, password: password);
       } else if (response.containsKey('laQuedada') &&
           response['laQuedada'].toString().toLowerCase().contains('registrado correctamente')) {
-        // Considera esto como éxito también
         return await login(email: email, password: password);
       } else {
         _errorMessage = 'Error en el registro: ${response['laQuedada'] ?? 'Desconocido'}';
@@ -274,7 +243,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Registra un nuevo negocio y realiza login automático si tiene éxito.
+  /// Registra un nuevo negocio
   Future<bool> registerBusiness({
     required String email,
     required String password,
@@ -313,7 +282,6 @@ class AuthProvider with ChangeNotifier {
         return await login(email: email, password: password);
       } else if (response.containsKey('laQuedada') &&
           response['laQuedada'].toString().toLowerCase().contains('registrado correctamente')) {
-        // Considera esto como éxito también
         return await login(email: email, password: password);
       } else {
         _errorMessage = 'Error en el registro: ${response['laQuedada'] ?? 'Desconocido'}';
@@ -371,51 +339,6 @@ class AuthProvider with ChangeNotifier {
       );
     }
     return false;
-  }
-
-  Future<void> registerWithGoogle() async {
-    try {
-      // Inicializar GoogleSignIn
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-
-      if (googleUser == null) {
-        // El usuario canceló el inicio de sesión
-        return;
-      }
-
-      // Obtener autenticación de Google
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      // Obtener el idToken
-      final String? idToken = googleAuth.idToken;
-
-      if (idToken == null) {
-        throw Exception("No se pudo obtener el idToken de Google.");
-      }
-
-      // Enviar el idToken al backend
-      final response = await http.post(
-        Uri.parse('https://tu-backend.com/api/auth/register/google'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'idToken': idToken}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['laQuedada'] == 'Usuario ya registrado') {
-          // Usuario ya registrado, proceder con el flujo normal
-          print("Usuario ya registrado: ${data['uid']}");
-        } else {
-          // Nuevo usuario registrado
-          print("Usuario registrado correctamente: ${data['uid']}");
-        }
-      } else {
-        throw Exception("Error al registrar con Google: ${response.body}");
-      }
-    } catch (e) {
-      print("Error en Google Sign-In: $e");
-    }
   }
 
   // ============================
@@ -529,7 +452,6 @@ class AuthProvider with ChangeNotifier {
         throw Exception('Tipo de usuario desconocido');
       }
 
-      // Actualizar datos locales
       await _loadUserData();
 
       return result;

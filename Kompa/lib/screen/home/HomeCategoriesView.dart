@@ -13,6 +13,9 @@ import 'package:geocoding/geocoding.dart';
 import 'EventDetailScreen.dart';
 
 class HomeCategoriesView extends StatefulWidget {
+  //===========
+  // Variables
+  //===========
   final String categoryId;
   final String categoryTitle;
 
@@ -27,10 +30,12 @@ class HomeCategoriesView extends StatefulWidget {
 }
 
 class _HomeCategoriesViewState extends State<HomeCategoriesView> with SingleTickerProviderStateMixin {
+  //===========
+  // Variables
+  //===========
   late AnimationController _controller;
   ColorNotifire notifier = ColorNotifire();
   bool _initialized = false;
-  final List<Map<String, dynamic>> _filteredEvents = [];
 
   @override
   void initState() {
@@ -59,6 +64,7 @@ class _HomeCategoriesViewState extends State<HomeCategoriesView> with SingleTick
     }
   }
 
+  ///Metodo para obtener los eventos de la categoría seleccionada
   Future<void> _fetchEvents() async {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -83,12 +89,15 @@ class _HomeCategoriesViewState extends State<HomeCategoriesView> with SingleTick
         );
       }
     } catch (e) {
-      // Manejo de errores
+      print("Error fetching events: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    //===========
+    // Variables
+    //===========
     notifier = Provider.of<ColorNotifire>(context, listen: true);
     final homeProvider = Provider.of<HomeProvider>(context);
     final trendingEvents = homeProvider.trendingEvents;

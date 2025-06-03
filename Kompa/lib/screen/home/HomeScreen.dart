@@ -22,6 +22,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
+  //============
+  // Variables
+  //============
   String? _cityName;
   String? _userName;
   int currentIndex = 0;
@@ -43,7 +46,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
         authProvider.updateUserDataState(userData);
 
-        // Mensaje de bienvenida después de obtener el nombre del usuario
         if (!_showedWelcomeMessage && mounted) {
           _showedWelcomeMessage = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -65,6 +67,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     });
   }
 
+  ///Metodo para obtener la ubicación del usuario
   Future<void> _getLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -108,6 +111,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    //==========
+    // Providers
+    //===========
     final notifier = Provider.of<ColorNotifire>(context);
     final categoryProvider = Provider.of<CategoryProvider>(context);
     final authProvider = Provider.of<AuthProvider>(context);
@@ -116,6 +122,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: notifier.backGround,
       appBar: AppBar(

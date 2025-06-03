@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/AuthProvider.dart';
 import '../../providers/HomeProvider.dart';
+import '../../providers/RatingProvider.dart';
 import '../../widget/ExpandableInfoCard.dart';
 import '../Home/EventDetailScreen.dart';
 import './SettingScreen.dart';
@@ -12,6 +13,7 @@ import '../../config/dark_mode.dart';
 import 'EditProfileScreen.dart';
 import 'package:geocoding/geocoding.dart';
 import 'ReviewsScreen.dart';
+import 'ListFriendScreen.dart';
 
 class profile extends StatefulWidget {
   const profile({super.key});
@@ -21,20 +23,77 @@ class profile extends StatefulWidget {
 }
 
 class _profileState extends State<profile> {
+  //==========
+  // Variables
+  //==========
   ColorNotifire notifier = ColorNotifire();
   Map<String, dynamic>? userData;
   bool isLoading = true;
 
   List<Map<String, dynamic>> _userEvents = [];
   bool _loadingEvents = false;
+  late RatingProvider ratingProvider;
+
+  int _followersCount = 0;
+  int _followingCount = 0;
+  bool _loadingFollowCounts = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
     _fetchUserEvents();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadRatings();
+      _loadFollowCounts();
+    });
   }
 
+  ///Metodo para cargar los contadores de seguidores y seguidos
+  Future<void> _loadFollowCounts() async {
+    if (mounted) {
+      setState(() {
+        _loadingFollowCounts = true;
+      });
+    }
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final apiService = Provider.of<HomeProvider>(context, listen: false).apiService;
+
+      if (authProvider.userId != null) {
+        final userType = authProvider.userType ?? 'CLIENT';
+        final collection = userType == 'CLIENT' ? 'clientUsers' : 'businessUsers';
+
+        final followers = await apiService.getFollowers(authProvider.userId!, collection);
+        final following = await apiService.getFollowing(authProvider.userId!, collection);
+
+        if (mounted) {
+          setState(() {
+            _followersCount = followers.length;
+            _followingCount = following.length;
+            _loadingFollowCounts = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error al cargar seguidos/seguidores: $e');
+      if (mounted) {
+        setState(() {
+          _loadingFollowCounts = false;
+        });
+      }
+    }
+  }
+
+  ///Metodo para cargar las valoraciones del usuario
+  Future<void> _loadRatings() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    ratingProvider = Provider.of<RatingProvider>(context, listen: false);
+    await ratingProvider.loadUserRating(authProvider.userId);
+  }
+
+  ///Metodo para cargar los datos del usuario
   Future<void> _loadUserData() async {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -52,6 +111,7 @@ class _profileState extends State<profile> {
     }
   }
 
+  ///Metodo para cargar los eventos del usuario
   Future<void> _fetchUserEvents() async {
     setState(() {
       _loadingEvents = true;
@@ -85,6 +145,7 @@ class _profileState extends State<profile> {
     }
   }
 
+  ///Metodo para obtener la ciudad a partir de las coordenadas
   Future<String> getCityFromCoordinates(double lat, double lng) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
@@ -97,6 +158,9 @@ class _profileState extends State<profile> {
 
   @override
   Widget build(BuildContext context) {
+    //==========
+    // Variables
+    //==========
     notifier = Provider.of<ColorNotifire>(context, listen: true);
     final authProvider = Provider.of<AuthProvider>(context);
     final userType = authProvider.userType;
@@ -123,6 +187,23 @@ class _profileState extends State<profile> {
           ),
         ),
         actions: [
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const Share_profile(),
+                ),
+              );
+            },
+            child: Image.asset(
+              "assets/Share.png",
+              height: 30,
+              width: 30,
+              color: notifier.textColor,
+            ),
+          ),
+          AppConstants.Width(width / 30),
           InkWell(
             onTap: () {
               Navigator.push(
@@ -220,83 +301,81 @@ class _profileState extends State<profile> {
                     ),
                     AppConstants.Height(height / 65),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Expanded(
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => List_friend(
+                                  userId: Provider.of<AuthProvider>(context, listen: false).userId ?? '',
+                                  mode: FriendListMode.followers,
+                                ),
+                              ),
+                            ).then((_) => _loadFollowCounts());
+                          },
                           child: Column(
                             children: [
-                              Text(
-                                "500",
+                              _loadingFollowCounts
+                                  ? SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                                  : Text(
+                                _followersCount.toString(),
                                 style: TextStyle(
+                                  color: notifier.textColor,
                                   fontFamily: "Ariom-Bold",
                                   fontSize: 18,
-                                  color: notifier.textColor,
                                 ),
                               ),
                               Text(
                                 "Seguidores",
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: "Ariom-Regular",
-                                  color: notifier.subtitleTextColor,
+                                  color: notifier.textColor,
+                                  fontSize: 14,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        Container(
-                          height: 40,
-                          width: 1,
-                          decoration: BoxDecoration(
-                            color: notifier.textColor,
-                          ),
-                        ),
-                        Expanded(
+
+                        SizedBox(width: 40),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => List_friend(
+                                  userId: Provider.of<AuthProvider>(context, listen: false).userId ?? '',
+                                  mode: FriendListMode.following,
+                                ),
+                              ),
+                            ).then((_) => _loadFollowCounts());
+                          },
                           child: Column(
                             children: [
-                              Text(
-                                "302",
+                              _loadingFollowCounts
+                                  ? SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                                  : Text(
+                                _followingCount.toString(),
                                 style: TextStyle(
+                                  color: notifier.textColor,
                                   fontFamily: "Ariom-Bold",
                                   fontSize: 18,
-                                  color: notifier.textColor,
                                 ),
                               ),
                               Text(
                                 "Siguiendo",
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: "Ariom-Regular",
-                                  color: notifier.subtitleTextColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          height: 40,
-                          width: 1,
-                          decoration: BoxDecoration(
-                            color: notifier.subtitleTextColor,
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                "${_userEvents.length}",
-                                style: TextStyle(
-                                  fontFamily: "Ariom-Bold",
-                                  fontSize: 18,
                                   color: notifier.textColor,
-                                ),
-                              ),
-                              Text(
-                                "Eventos",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: "Ariom-Regular",
-                                  color: notifier.subtitleTextColor,
+                                  fontSize: 14,
                                 ),
                               ),
                             ],
@@ -305,44 +384,6 @@ class _profileState extends State<profile> {
                       ],
                     ),
                     AppConstants.Height(height / 40),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Share_profile(),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        height: 54,
-                        width: width / 1.3,
-                        decoration: BoxDecoration(
-                          color: notifier.buttonColor,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              "assets/Share.png",
-                              height: 24,
-                              color: Colors.black,
-                            ),
-                            AppConstants.Width(width / 40),
-                            const Text(
-                              "Compartir perfil",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    AppConstants.Height(height / 60),
                     SizedBox(
                       width: width / 1.3,
                       child: ExpandableInfoCard(
@@ -350,7 +391,7 @@ class _profileState extends State<profile> {
                         backgroundColor: notifier.backGround,
                         headerColor: notifier.buttonColor,
                         textColor: notifier.svgColor,
-                        shadowColor: notifier.inv,      
+                        shadowColor: notifier.inv,
                         children: userType == "CLIENT" ? _buildClientDetails() : _buildBusinessDetails(),
                       ),
                     ),
@@ -405,12 +446,23 @@ class _profileState extends State<profile> {
                                       ),
                                       child: Row(
                                         children: [
-                                          Text(
-                                            "4.8",
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: notifier.buttonTextColor,
+                                          Consumer<RatingProvider>(
+                                            builder: (context, ratingProvider, _) => ratingProvider.isLoading
+                                                ? SizedBox(
+                                              width: 14,
+                                              height: 14,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: notifier.buttonTextColor,
+                                              ),
+                                            )
+                                                : Text(
+                                              ratingProvider.averageRating.toStringAsFixed(1),
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: notifier.buttonTextColor,
+                                              ),
                                             ),
                                           ),
                                           const SizedBox(width: 4),
@@ -419,18 +471,6 @@ class _profileState extends State<profile> {
                                       ),
                                     ),
                                   ],
-                                ),
-                                const SizedBox(height: 12),
-                                _buildReviewPreview(
-                                  "Laura Martínez",
-                                  "Excelente servicio, muy recomendable...",
-                                  4.5,
-                                ),
-                                const Divider(),
-                                _buildReviewPreview(
-                                  "Carlos López",
-                                  "La experiencia fue buena, aunque...",
-                                  4.0,
                                 ),
                                 const SizedBox(height: 12),
                                 Center(
@@ -582,73 +622,7 @@ class _profileState extends State<profile> {
     );
   }
 
-  Widget _buildReviewPreview(String name, String comment, double rating) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: notifier.buttonColor,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              name.substring(0, 1),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: notifier.textColor,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: notifier.textColor,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: List.generate(
-                      5,
-                          (index) => Icon(
-                        index < rating.floor() ? Icons.star :
-                        index < rating ? Icons.star_half : Icons.star_border,
-                        color: const Color(0xffD1E50C),
-                        size: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                comment,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: notifier.subtitleTextColor,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
+  ///Metodo para construir los detalles del cliente
   List<Widget> _buildClientDetails() {
     return [
       _buildDetailItem("Teléfono", userData?['phone']?.toString() ?? "No disponible"),
@@ -659,6 +633,7 @@ class _profileState extends State<profile> {
     ];
   }
 
+  ///Metodo para construir los detalles del negocio
   List<Widget> _buildBusinessDetails() {
     return [
       _buildDetailItem("Teléfono", userData?['phone']?.toString() ?? "No disponible"),
@@ -667,6 +642,7 @@ class _profileState extends State<profile> {
     ];
   }
 
+  ///Metodo para construir un item de detalle
   Widget _buildDetailItem(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -695,6 +671,7 @@ class _profileState extends State<profile> {
     );
   }
 
+  ///Metodo para formatear la fecha de nacimiento
   String? _formatBirthDate() {
     if (userData?['birthDate'] == null) return null;
     try {
@@ -712,6 +689,7 @@ class _profileState extends State<profile> {
     }
   }
 
+  ///Metodo para obtener la abreviatura del mes
   String _getMonthAbbreviation(int month) {
     switch (month) {
       case 1: return "Ene";
@@ -730,3 +708,4 @@ class _profileState extends State<profile> {
     }
   }
 }
+

@@ -26,6 +26,9 @@ class CategoryDetail extends StatefulWidget {
 }
 
 class _CategoryDetailState extends State<CategoryDetail> {
+  // ===================
+  // Variables privadas
+  // ===================
   ColorNotifire notifier = ColorNotifire();
   List<Map<String, dynamic>> _events = [];
   List<Map<String, dynamic>> _filteredEvents = [];
@@ -41,7 +44,6 @@ class _CategoryDetailState extends State<CategoryDetail> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    // Cargamos los eventos usando Future para evitar errores de build
     Future.microtask(() => _loadInitialEvents());
   }
 
@@ -62,21 +64,19 @@ class _CategoryDetailState extends State<CategoryDetail> {
     }
   }
 
+  ///Metodo para cargar los eventos iniciales
   Future<void> _loadInitialEvents() async {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     try {
       setState(() => _isLoading = true);
       List<Map<String, dynamic>> eventsList;
 
-      // Si es usuario de negocio, filtramos sus eventos por categoría
       if (homeProvider.isBusinessUser && homeProvider.currentUserId != null) {
         final businessEvents = await homeProvider.apiService.getEventsByBusinessId(homeProvider.currentUserId!);
         eventsList = List<Map<String, dynamic>>.from(
             businessEvents.where((event) => event['categoryId'] == widget.categoryId).toList());
       } else {
-        // Si es usuario cliente, obtenemos eventos cercanos filtrados por categoría
         final position = homeProvider.lastKnownPosition ??
             await homeProvider.getCurrentPosition();
 
@@ -107,6 +107,7 @@ class _CategoryDetailState extends State<CategoryDetail> {
     }
   }
 
+  ///Metodo para cargar mas eventos
   Future<void> _loadMoreEvents() async {
     if (_isLoadingMore) return;
 
@@ -114,9 +115,7 @@ class _CategoryDetailState extends State<CategoryDetail> {
     _currentPage++;
 
     final start = (_currentPage - 1) * _eventsPerPage;
-    final end = start + _eventsPerPage;
 
-    // Aplicamos el filtro de búsqueda si existe
     final newEvents = _searchQuery.isEmpty
         ? _events.skip(start).take(_eventsPerPage).toList()
         : _events
@@ -136,6 +135,7 @@ class _CategoryDetailState extends State<CategoryDetail> {
     }
   }
 
+  ///Metodo para filtrar los eventos
   void _filterEvents(String query) {
     setState(() {
       _searchQuery = query;

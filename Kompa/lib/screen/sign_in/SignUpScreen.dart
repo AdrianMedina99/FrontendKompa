@@ -17,6 +17,9 @@ class Sign_up extends StatefulWidget {
 }
 
 class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
+  //===========================
+  // Variables y controladores
+  //===========================
   ColorNotifire notifier = ColorNotifire();
   late TabController _tabController;
 
@@ -37,10 +40,8 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _websiteController = TextEditingController();
 
-  // Variable para el género seleccionado
   String? _selectedGender;
 
-  // Map para almacenar errores de validación
   final Map<String, String?> _validationErrors = {};
 
   @override
@@ -51,7 +52,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    // Libera los controladores
     _emailController.dispose();
     _passwordController.dispose();
     _repeatPasswordController.dispose();
@@ -69,10 +69,9 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  ///Metodo para registrar al usuario con validación de campos
   void _registerUser(BuildContext context) async {
-    // Validaciones para CLIENTE
     if (_tabController.index == 0) {
-      // Validación de campos obligatorios
       if (_nameController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -93,7 +92,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
         );
         return;
       }
-      // Validar formato de teléfono (al menos 9 dígitos)
       if (!RegExp(r'^[0-9]{9,}$').hasMatch(_phoneController.text)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -114,7 +112,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
         );
         return;
       }
-      // Validación de formato de fecha
       try {
         DateFormat('dd/MM/yyyy').parse(_dateController.text);
       } catch (e) {
@@ -127,7 +124,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
         );
         return;
       }
-      // Validar DNI si está presente
       if (_dniController.text.isNotEmpty &&
           !RegExp(r'^[0-9]{8}[A-Za-z]$').hasMatch(_dniController.text)) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -139,7 +135,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
         );
         return;
       }
-      // Validar género
       if (_selectedGender == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -150,7 +145,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
         );
         return;
       }
-      // Validar ciudad y provincia/estado
       if (_cityController.text.isEmpty || _stateController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -161,7 +155,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
         );
         return;
       }
-      // Validar email y contraseñas
       if (_emailController.text.isEmpty ||
           _passwordController.text.isEmpty ||
           _repeatPasswordController.text.isEmpty) {
@@ -206,7 +199,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
       }
     }
 
-    // Validaciones para NEGOCIO
     if (_tabController.index == 1) {
       if (_businessNameController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -228,7 +220,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
         );
         return;
       }
-      // Validar formato de teléfono (al menos 9 dígitos)
       if (!RegExp(r'^[0-9]{9,}$').hasMatch(_phoneController.text)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -239,7 +230,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
         );
         return;
       }
-      // Validar sitio web si está presente
       if (_websiteController.text.isNotEmpty) {
         final urlPattern = RegExp(
           r'^(http|https)://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?$',
@@ -256,7 +246,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
           return;
         }
       }
-      // Validar ciudad y provincia/estado
       if (_cityController.text.isEmpty || _stateController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -267,7 +256,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
         );
         return;
       }
-      // Validar email y contraseñas
       if (_emailController.text.isEmpty ||
           _passwordController.text.isEmpty ||
           _repeatPasswordController.text.isEmpty) {
@@ -316,7 +304,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
 
     final userType = _tabController.index == 0 ? "CLIENT" : "BUSINESS";
 
-    // Construcción de datos
     final userData = _tabController.index == 0
         ? {
       'nombre': _nameController.text,
@@ -359,6 +346,7 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
     }
   }
 
+  /// Metodo para mostrar un diálogo de error
   void _showErrorDialog(BuildContext context, String message) {
     showDialog(
       context: context,
@@ -377,11 +365,11 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
     );
   }
 
-  // Función para mostrar el selector de fecha
+  /// Metodo para seleccionar la fecha de nacimiento
   void _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 6570)), // ~18 años
+      initialDate: DateTime.now().subtract(const Duration(days: 6570)),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -406,7 +394,7 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
     }
   }
 
-  // Método para validar campos en tiempo real
+  /// Metodo para validar campos en tiempo real
   void _validateField(String fieldName, String value) {
     setState(() {
       switch (fieldName) {
@@ -500,7 +488,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Formulario para clientes
           SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -516,7 +503,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     ),
                   ),
                   AppConstants.Height(height / 50),
-                  // Campo de correo electrónico
                   _buildValidatedTextField(
                     hintText: "Correo electrónico",
                     prefixIcon: Icons.email_outlined,
@@ -525,7 +511,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     fieldName: 'email',
                   ),
                   AppConstants.Height(height / 50),
-                  // Campo de contraseña
                   _buildValidatedTextField(
                     hintText: "Contraseña",
                     prefixIcon: Icons.lock_outline,
@@ -540,13 +525,12 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     },
                   ),
                   AppConstants.Height(height / 50),
-                  // Campo de repetir contraseña
                   _buildValidatedTextField(
                     hintText: "Repetir contraseña",
                     prefixIcon: Icons.lock_outline,
                     controller: _repeatPasswordController,
                     isPassword: true,
-                    obscureText: _obscureTextClient, // Usa la misma lógica de visibilidad
+                    obscureText: _obscureTextClient,
                     fieldName: 'repeatPassword',
                     onVisibilityToggle: () {
                       setState(() {
@@ -564,21 +548,18 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     ),
                   ),
                   AppConstants.Height(height / 50),
-                  // Nombre
                   _buildTextField(
                     hintText: "Nombre",
                     prefixIcon: Icons.person_outline,
                     controller: _nameController,
                   ),
                   AppConstants.Height(height / 50),
-                  // Apellidos
                   _buildTextField(
                     hintText: "Apellidos",
                     prefixIcon: Icons.person_outline,
                     controller: _lastNameController,
                   ),
                   AppConstants.Height(height / 50),
-                  // Fecha de nacimiento
                   GestureDetector(
                     onTap: () => _selectDate(context),
                     child: AbsorbPointer(
@@ -590,14 +571,12 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     ),
                   ),
                   AppConstants.Height(height / 50),
-                  // DNI
                   _buildTextField(
                     hintText: "DNI",
                     prefixIcon: Icons.credit_card_outlined,
                     controller: _dniController,
                   ),
                   AppConstants.Height(height / 50),
-                  // Teléfono
                   _buildValidatedTextField(
                     hintText: "Teléfono",
                     prefixIcon: Icons.phone_outlined,
@@ -606,7 +585,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     fieldName: 'phone',
                   ),
 
-                  // Selector de género
                   AppConstants.Height(height / 50),
                   Text(
                     "Género",
@@ -638,14 +616,12 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     controller: _cityController,
                   ),
                   AppConstants.Height(height / 50),
-                  // Provincia / Estado
                   _buildTextField(
                     hintText: "Provincia / Estado",
                     prefixIcon: Icons.map_outlined,
                     controller: _stateController,
                   ),
                   AppConstants.Height(height / 30),
-                  // Botón de registro
                   GestureDetector(
                     onTap: () => _registerUser(context),
                     child: Container(
@@ -673,7 +649,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
             ),
           ),
 
-          // Formulario para negocios
           SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -689,20 +664,18 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     ),
                   ),
                   AppConstants.Height(height / 50),
-                  // Campo de correo electrónico
                   _buildValidatedTextField(
                     hintText: "Correo electrónico corporativo",
                     prefixIcon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
-                    controller: _emailController, // Conexión al controlador
+                    controller: _emailController,
                     fieldName: 'email',
                   ),
                   AppConstants.Height(height / 50),
-                  // Campo de contraseña
                   _buildValidatedTextField(
                     hintText: "Contraseña",
                     prefixIcon: Icons.lock_outline,
-                    controller: _passwordController, // Conexión al controlador
+                    controller: _passwordController,
                     isPassword: true,
                     obscureText: _obscureTextBusiness,
                     fieldName: 'password',
@@ -713,11 +686,10 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     },
                   ),
                   AppConstants.Height(height / 50),
-                  // Campo de repetir contraseña
                   _buildValidatedTextField(
                     hintText: "Repetir contraseña",
                     prefixIcon: Icons.lock_outline,
-                    controller: _repeatPasswordController, // Conexión al controlador
+                    controller: _repeatPasswordController,
                     isPassword: true,
                     obscureText: _obscureTextBusiness,
                     fieldName: 'repeatPassword',
@@ -737,28 +709,25 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     ),
                   ),
                   AppConstants.Height(height / 50),
-                  // Nombre de la empresa
                   _buildTextField(
                     hintText: "Nombre de la empresa",
                     prefixIcon: Icons.business_outlined,
-                    controller: _businessNameController, // Conexión al controlador
+                    controller: _businessNameController,
                   ),
                   AppConstants.Height(height / 50),
-                  // Teléfono
                   _buildValidatedTextField(
                     hintText: "Teléfono de contacto",
                     prefixIcon: Icons.phone_outlined,
                     keyboardType: TextInputType.phone,
-                    controller: _phoneController, // Conexión al controlador
+                    controller: _phoneController,
                     fieldName: 'phone',
                   ),
                   AppConstants.Height(height / 50),
-                  // Sitio web
                   _buildTextField(
                     hintText: "Sitio web",
                     prefixIcon: Icons.web_outlined,
                     keyboardType: TextInputType.url,
-                    controller: _websiteController, // Conexión al controlador
+                    controller: _websiteController,
                   ),
                   AppConstants.Height(height / 30),
                   Text(
@@ -774,17 +743,15 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                   _buildTextField(
                     hintText: "Ciudad",
                     prefixIcon: Icons.location_city_outlined,
-                    controller: _cityController, // Conexión al controlador
+                    controller: _cityController,
                   ),
                   AppConstants.Height(height / 50),
-                  // Provincia / Estado
                   _buildTextField(
                     hintText: "Provincia / Estado",
                     prefixIcon: Icons.map_outlined,
-                    controller: _stateController, // Conexión al controlador
+                    controller: _stateController,
                   ),
                   AppConstants.Height(height / 30),
-                  // Botón de registro
                   GestureDetector(
                     onTap: () => _registerUser(context),
                     child: Container(
@@ -816,7 +783,7 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
     );
   }
 
-  // Widget para construir los campos de texto
+  /// Widget para construir campos de texto genéricos
   Widget _buildTextField({
     required String hintText,
     required IconData prefixIcon,
@@ -884,7 +851,7 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
     );
   }
 
-  // Widget para construir campos de texto con validación
+  /// Widget para construir campos de texto con validación
   Widget _buildValidatedTextField({
     required String hintText,
     required IconData prefixIcon,
@@ -974,7 +941,7 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
     );
   }
 
-  // Widget para construir campos de selección desplegable
+  /// Widget para construir campos de selección desplegable
   Widget _buildDropdownField({
     required List<String> items,
     required String hintText,

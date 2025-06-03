@@ -11,7 +11,10 @@ import '../../providers/AuthProvider.dart';
 import '../common/BottomScreen.dart';
 
 class Edit_Profile extends StatefulWidget {
-  final String userType; // CLIENT o BUSINESS
+  //===========
+  // Variables
+  //===========
+  final String userType;
 
   const Edit_Profile({super.key, required this.userType});
 
@@ -20,6 +23,9 @@ class Edit_Profile extends StatefulWidget {
 }
 
 class _Edit_ProfileState extends State<Edit_Profile> {
+  //===========
+  // Variables
+  //===========
   ColorNotifire notifier = ColorNotifire();
   Map<String, dynamic>? userData;
   File? _profileImage;
@@ -31,6 +37,7 @@ class _Edit_ProfileState extends State<Edit_Profile> {
     _loadUserData();
   }
 
+  ///Metodo para cargar los datos del usuario
   Future<void> _loadUserData() async {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -54,6 +61,7 @@ class _Edit_ProfileState extends State<Edit_Profile> {
     }
   }
 
+  ///Metodo para formatear la fecha de nacimiento
   String? _getFormattedBirthDate(dynamic birthDate) {
     if (birthDate == null) return null;
     try {
@@ -73,9 +81,7 @@ class _Edit_ProfileState extends State<Edit_Profile> {
     }
   }
 
-
-
-  // Declaración de los controladores de texto
+/// Controladores de texto para los campos del formulario
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -86,7 +92,6 @@ class _Edit_ProfileState extends State<Edit_Profile> {
 
   @override
   void dispose() {
-    // Liberar los controladores
     _nameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
@@ -102,7 +107,6 @@ class _Edit_ProfileState extends State<Edit_Profile> {
 
     if (pickedFile != null) {
       try {
-        // Verificar la extensión del archivo
         final String extension = pickedFile.path.split('.').last.toLowerCase();
         final List<String> formatosPermitidos = ['png', 'svg', 'jpg', 'jpeg', 'gif', 'webp'];
 
@@ -118,9 +122,6 @@ class _Edit_ProfileState extends State<Edit_Profile> {
 
         final int estimatedBase64Size = (fileSize * 1.33).toInt();
         final int maxSize = 2 * 1024 * 1024;
-
-        print("Tamaño original: ${fileSize / 1024} KB");
-        print("Tamaño estimado en base64: ${estimatedBase64Size / 1024} KB");
 
         if (estimatedBase64Size > maxSize) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -197,7 +198,8 @@ class _Edit_ProfileState extends State<Edit_Profile> {
           final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
           try {
-            // Validación de campos obligatorios
+            /// Validaciones de los campos
+
             if (_nameController.text.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -220,7 +222,6 @@ class _Edit_ProfileState extends State<Edit_Profile> {
               return;
             }
 
-            // Validar formato de teléfono
             if (!RegExp(r'^[0-9]{9,}$').hasMatch(_phoneController.text)) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -232,7 +233,6 @@ class _Edit_ProfileState extends State<Edit_Profile> {
               return;
             }
 
-            // Validaciones específicas para clientes
             if (widget.userType == "CLIENT") {
               if (_dateController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -245,7 +245,6 @@ class _Edit_ProfileState extends State<Edit_Profile> {
                 return;
               }
 
-              // Validar DNI si está presente
               if (_dniController.text.isNotEmpty &&
                   !RegExp(r'^[0-9]{8}[A-Za-z]$').hasMatch(_dniController.text)) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -259,7 +258,6 @@ class _Edit_ProfileState extends State<Edit_Profile> {
               }
             }
 
-            // Validaciones para empresas
             if (widget.userType == "BUSINESS" && _websiteController.text.isNotEmpty) {
               final urlPattern = RegExp(
                 r'^(http|https)://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?$',
@@ -673,7 +671,7 @@ class _Edit_ProfileState extends State<Edit_Profile> {
   void _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 6570)), // ~18 años
+      initialDate: DateTime.now().subtract(const Duration(days: 6570)),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {

@@ -5,7 +5,6 @@ import '../../config/dark_mode.dart';
 import '../../providers/CategoryProvider.dart';
 import '../../providers/AuthProvider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import '../common/SearchScreen.dart';
 import 'CategoryDetail.dart';
 

@@ -8,8 +8,6 @@ import '../../config/dark_mode.dart';
 import '../../providers/AuthProvider.dart';
 import 'EditProfileScreen.dart';
 import 'PrivacyPolicy.dart';
-import 'list_friend.dart';
-import '../paymentGateway/payment_card.dart';
 import '../sign_in/LoginScreen.dart';
 
 class Setting extends StatefulWidget {

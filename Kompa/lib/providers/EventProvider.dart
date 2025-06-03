@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import '../service/apiService.dart';
 
 class EventProvider with ChangeNotifier {
+
+  // ============================
+  // Variables privadas y getters
+  // ============================
+
   final ApiService apiService;
-
   EventProvider({required this.apiService});
-
   Map<String, dynamic>? _eventData;
   bool _isLoading = false;
   String? _error;
-
   Map<String, dynamic>? get eventData => _eventData;
   bool get isLoading => _isLoading;
   String? get error => _error;

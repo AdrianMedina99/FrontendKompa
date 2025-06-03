@@ -634,4 +634,157 @@ class ApiService {
   }
 
 
+  // GESTIÓN DE VALORACIONES
+
+// Crear una nueva valoración
+  Future<String> createValoration(Map<String, dynamic> valorationData) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/valorations'),
+      headers: _getHeaders(),
+      body: jsonEncode(valorationData),
+    );
+
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Error al crear la valoración: ${response.body}');
+    }
+  }
+
+// Obtener una valoración por ID
+  Future<Map<String, dynamic>> getValoration(String id) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/valorations/$id'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener la valoración: ${response.body}');
+    }
+  }
+
+// Obtener todas las valoraciones
+  Future<List<dynamic>> getAllValorations() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/valorations'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener las valoraciones: ${response.body}');
+    }
+  }
+
+// Obtener valoraciones por ID de valorado
+  Future<List<dynamic>> getValorationsByValorado(String valoradoId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/valorations/byValorado/$valoradoId'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener las valoraciones: ${response.body}');
+    }
+  }
+
+// Obtener valoraciones por ID de usuario cliente
+  Future<List<dynamic>> getValorationsByClientUser(String clientUserId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/valorations/byClientUser/$clientUserId'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener las valoraciones: ${response.body}');
+    }
+  }
+
+// Actualizar una valoración
+  Future<String> updateValoration(String id, Map<String, dynamic> valorationData) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/api/valorations/$id'),
+      headers: _getHeaders(),
+      body: jsonEncode(valorationData),
+    );
+
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Error al actualizar la valoración: ${response.body}');
+    }
+  }
+
+// Eliminar una valoración
+  Future<String> deleteValoration(String id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/api/valorations/$id'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Error al eliminar la valoración: ${response.body}');
+    }
+  }
+
+  // SERVICIOS DE FOLLOW
+
+  Future<String> followUser(String userId, String followedUserId, String fromCollection, String toCollection) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/follow/follow?userId=$userId&followedUserId=$followedUserId&fromCollection=$fromCollection&toCollection=$toCollection'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Error al seguir usuario: ${response.body}');
+    }
+  }
+
+  Future<String> unfollowUser(String userId, String followedUserId, String fromCollection, String toCollection) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/follow/unfollow?userId=$userId&followedUserId=$followedUserId&fromCollection=$fromCollection&toCollection=$toCollection'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Error al dejar de seguir usuario: ${response.body}');
+    }
+  }
+
+  Future<List<String>> getFollowing(String userId, String collection) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/follow/following/$userId?collection=$collection'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return List<String>.from(data);
+    } else {
+      throw Exception('Error al obtener seguidos: ${response.body}');
+    }
+  }
+
+  Future<List<String>> getFollowers(String userId, String collection) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/follow/followers/$userId?collection=$collection'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return List<String>.from(data);
+    } else {
+      throw Exception('Error al obtener seguidores: ${response.body}');
+    }
+  }
 }

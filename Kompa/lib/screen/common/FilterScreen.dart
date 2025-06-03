@@ -15,13 +15,17 @@ class Filter extends StatefulWidget {
 }
 
 class _FilterState extends State<Filter> {
+
+  //=================
+  // Variables
+  //=================
   ColorNotifire notifier = ColorNotifire();
-  double _distance = 0; // Distancia en kilómetros
+  double _distance = 0;
   DateTime? _startDate;
   DateTime? _endDate;
   List<Map<String, dynamic>> _selectedCategories = [];
   Position? _currentPosition;
-  int? _edad; // Nuevo campo para la edad
+  int? _edad;
 
   @override
   void initState() {
@@ -30,6 +34,7 @@ class _FilterState extends State<Filter> {
     _loadCategories();
   }
 
+  ///Metodo para obtener la ubicación actual del usuario
   Future<void> _getCurrentLocation() async {
     try {
       _currentPosition = await Geolocator.getCurrentPosition();
@@ -38,13 +43,14 @@ class _FilterState extends State<Filter> {
     }
   }
 
+  ///Metodo para cargar las categorías desde el proveedor
   Future<void> _loadCategories() async {
     final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
     await categoryProvider.fetchCategories();
   }
 
+  ///Metodo para aplicar los filtros seleccionados
   void _applyFilters() {
-    // Validación: endDate no puede ser menor que startDate
     if (_startDate != null && _endDate != null && _endDate!.isBefore(_startDate!)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -60,7 +66,7 @@ class _FilterState extends State<Filter> {
       'endDate': _endDate,
       'categories': _selectedCategories.map((c) => c['id']).toList(),
       'position': _currentPosition,
-      'edad': _edad, // Pasar el filtro de edad
+      'edad': _edad,
     });
   }
 
@@ -69,7 +75,6 @@ class _FilterState extends State<Filter> {
     notifier = Provider.of<ColorNotifire>(context, listen: true);
     final categoryProvider = Provider.of<CategoryProvider>(context);
     var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: notifier.backGround,

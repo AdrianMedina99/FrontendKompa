@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import '../../config/dark_mode.dart';
 import '../../providers/HiloProvider.dart';
 import '../../providers/AuthProvider.dart';
+import '../profile/OtherProfileScreen.dart';
 
 class Hilo extends StatefulWidget {
+
+  //==========
+  // Variables
+  //==========
   final String eventId;
+
   const Hilo({Key? key, required this.eventId}) : super(key: key);
 
   @override
@@ -14,11 +19,13 @@ class Hilo extends StatefulWidget {
 }
 
 class _HiloState extends State<Hilo> {
+  //==========
+  // Variables
+  //==========
   late TextEditingController _postController;
   Map<String, TextEditingController> _replyControllers = {};
   Map<String, FocusNode> _replyFocusNodes = {};
-  String? _replyingToId;
-  Set<String> _showReplyFieldFor = {}; // <-- IDs de mensajes con campo responder visible
+  Set<String> _showReplyFieldFor = {};
 
   late ColorNotifire notifier;
 
@@ -43,6 +50,7 @@ class _HiloState extends State<Hilo> {
     super.dispose();
   }
 
+  ///Metodo para formatear el tiempo.
   String _formatTimeAgo(DateTime time) {
     final now = DateTime.now();
     final diff = now.difference(time);
@@ -97,7 +105,6 @@ class _HiloState extends State<Hilo> {
         builder: (context, hiloProvider, _) {
           return Column(
             children: [
-              // Crear nuevo post
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Card(
@@ -142,29 +149,34 @@ class _HiloState extends State<Hilo> {
                             onPressed: _postController.text.isEmpty || hiloProvider.isLoading
                                 ? null
                                 : () async {
-                              final ok = await hiloProvider.createHilo(_postController.text);
-                              if (ok) _postController.clear();
-                            },
+                                    final ok = await hiloProvider.createHilo(_postController.text);
+                                    if (ok) _postController.clear();
+                                  },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: notifier.buttonColor,
+                              backgroundColor: _postController.text.isEmpty || hiloProvider.isLoading
+                                  ? notifier.inv
+                                  : notifier.buttonColor,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                               elevation: 0,
                             ),
                             child: hiloProvider.isLoading
                                 ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: notifier.buttonTextColor),
-                            )
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: notifier.inv,
+                                    ),
+                                  )
                                 : Text(
-                              "Publicar",
-                              style: TextStyle(
-                                color: notifier.buttonTextColor,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
-                            ),
+                                    "Publicar",
+                                    style: TextStyle(
+                                      color: notifier.inv,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                           ),
                         ),
                       ],
@@ -172,8 +184,6 @@ class _HiloState extends State<Hilo> {
                   ),
                 ),
               ),
-
-              // Lista de posts
               Expanded(
                 child: hiloProvider.isLoading
                     ? Center(child: CircularProgressIndicator(color: notifier.buttonColor))
@@ -211,10 +221,7 @@ class _HiloState extends State<Hilo> {
   }
 
   Widget _buildPostCard(BuildContext context, Map<String, dynamic> post, HiloProvider hiloProvider) {
-    print("🖼️ DEBUG _buildPostCard: Construyendo post ${post['id']}");
-    print("🖼️ DEBUG - nombre: ${post['nombre'] ?? 'NO EXISTE NOMBRE'}");
-    print("🖼️ DEBUG - photo: ${post['photo'] ?? 'NO EXISTE PHOTO'}");
-    
+
     final postId = post["id"];
     if (!_replyControllers.containsKey(postId)) {
       _replyControllers[postId] = TextEditingController();
@@ -242,33 +249,55 @@ class _HiloState extends State<Hilo> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header post - Ajustado para alinear mejor
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center, // Cambiado a center para alinear verticalmente
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundImage: post['photo'] != null && post['photo'].toString().isNotEmpty
-                      ? NetworkImage(post['photo'])
-                      : const AssetImage("assets/Profile.png") as ImageProvider,
-                  backgroundColor: notifier.buttonColor.withOpacity(0.25),
+                GestureDetector(
+                  onTap: () {
+                    if (post['userId'] != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OtherProfileScreen(userId: post['userId']),
+                        ),
+                      );
+                    }
+                  },
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundImage: post['photo'] != null && post['photo'].toString().isNotEmpty
+                        ? NetworkImage(post['photo'])
+                        : const AssetImage("assets/Profile.png") as ImageProvider,
+                    backgroundColor: notifier.buttonColor.withOpacity(0.25),
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Usuario y tiempo en misma fila con espaciado correcto
                       Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              post["nombre"] ?? "Usuario",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 18,
-                                color: notifier.textColor,
-                                overflow: TextOverflow.ellipsis,
+                            child: GestureDetector(
+                              onTap: () {
+                                if (post['userId'] != null) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => OtherProfileScreen(userId: post['userId']),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Text(
+                                post["nombre"] ?? "Usuario",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
+                                  color: notifier.textColor,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
                           ),
@@ -294,7 +323,6 @@ class _HiloState extends State<Hilo> {
                     ],
                   ),
                 ),
-                // Botones separados de la información
                 Column(
                   children: [
                     IconButton(
@@ -359,7 +387,6 @@ class _HiloState extends State<Hilo> {
                 ),
               ],
             ),
-            // Mostrar campo responder solo si está abierto para este post
             if (_showReplyFieldFor.contains(postId)) ...[
               const SizedBox(height: 16),
               Row(
@@ -413,7 +440,6 @@ class _HiloState extends State<Hilo> {
               ),
             ],
             const SizedBox(height: 18),
-            // Respuestas list
             if (respuestas.isNotEmpty) ...[
               Divider(color: notifier.onBoardTextColor.withOpacity(0.3), thickness: 1.1),
               const SizedBox(height: 12),
@@ -450,15 +476,27 @@ class _HiloState extends State<Hilo> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center, // Cambiado a center para alinear verticalmente
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-              radius: 18,
-              backgroundImage: respuesta['photo'] != null && respuesta['photo'].toString().isNotEmpty
-                  ? NetworkImage(respuesta['photo'])
-                  : const AssetImage("assets/Profile.png") as ImageProvider,
-              backgroundColor: notifier.buttonColor.withOpacity(0.25),
-            ),
+              GestureDetector(
+                onTap: () {
+                  if (respuesta['userId'] != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => OtherProfileScreen(userId: respuesta['userId']),
+                      ),
+                    );
+                  }
+                },
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundImage: respuesta['photo'] != null && respuesta['photo'].toString().isNotEmpty
+                      ? NetworkImage(respuesta['photo'])
+                      : const AssetImage("assets/Profile.png") as ImageProvider,
+                  backgroundColor: notifier.buttonColor.withOpacity(0.25),
+                ),
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Container(
@@ -470,17 +508,28 @@ class _HiloState extends State<Hilo> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Usuario y tiempo en misma fila, correctamente alineados
                       Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              respuesta["nombre"] ?? "Usuario",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
-                                color: notifier.textColor,
-                                overflow: TextOverflow.ellipsis,
+                            child: GestureDetector(
+                              onTap: () {
+                                if (respuesta['userId'] != null) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => OtherProfileScreen(userId: respuesta['userId']),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Text(
+                                respuesta["nombre"] ?? "Usuario",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                  color: notifier.textColor,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
                           ),

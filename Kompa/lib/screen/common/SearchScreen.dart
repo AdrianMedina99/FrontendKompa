@@ -20,6 +20,10 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
+
+  //============
+  // Variables
+  //============
   ColorNotifire notifier = ColorNotifire();
   List<Map<String, dynamic>> allEvents = [];
   List<Map<String, dynamic>> filteredEvents = [];
@@ -38,24 +42,25 @@ class _SearchState extends State<Search> {
     super.dispose();
   }
 
+  ///Metodo para cargar todos los eventos al iniciar la pantalla
   Future<void> _loadAllEvents() async {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
     try {
       final events = await homeProvider.apiService.getAllEvents();
       setState(() {
         allEvents = List<Map<String, dynamic>>.from(events);
-        filteredEvents = allEvents; // Mostrar todos los eventos inicialmente
+        filteredEvents = allEvents;
       });
     } catch (e) {
       print("Error al cargar eventos: $e");
     }
   }
 
+  ///Metodo para filtrar los eventos basados en la busqueda y los filtros aplicados
   void _filterEvents({Map<String, dynamic>? filters}) async {
     final query = searchController.text.toLowerCase();
     List<Map<String, dynamic>> filtered = allEvents;
 
-    // FILTRO POR TEXTO
     if (query.isNotEmpty) {
       filtered = filtered
           .where((event) =>
@@ -64,7 +69,6 @@ class _SearchState extends State<Search> {
           .toList();
     }
 
-    // FILTRO POR FILTROS AVANZADOS
     if (filters != null) {
       // Distancia
       if (filters['distance'] != null && filters['distance'] > 0 && filters['position'] != null) {
@@ -123,6 +127,7 @@ class _SearchState extends State<Search> {
     });
   }
 
+  ///Metodo para obtener la ciudad a partir de las coordenadas
   Future<void> getCityFromLatLng(double lat, double lng, Function(String) callback) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
@@ -136,6 +141,7 @@ class _SearchState extends State<Search> {
     }
   }
 
+  ///Metodo para obtener la ciudad a partir de las coordenadas
   Future<String> getCityFromCoordinates(double lat, double lng) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
@@ -275,10 +281,10 @@ class _SearchState extends State<Search> {
                 shrinkWrap: true,
                 itemCount: filteredEvents.length,
                 itemBuilder: (context, index) {
-                  final event = filteredEvents[index];
 
-                  // Formateo de fecha basado en que el campo startDate venga como Map o String
+                  final event = filteredEvents[index];
                   String formattedTime = 'Fecha no disponible';
+
                   if (event['startDate'] != null) {
                     if (event['startDate'] is Map && event['startDate']['seconds'] != null) {
                       formattedTime = DateFormat("dd-MM-yyyy 'a las' HH:mm").format(
@@ -292,11 +298,10 @@ class _SearchState extends State<Search> {
                       }
                     }
                   }
-
-                  // Obtención de ubicación similar a AllScreen
                   final lat = event['latitud'];
                   final lng = event['longitud'];
                   Widget locationWidget;
+
                   if (event['location'] != null && !event['location'].toString().startsWith('(')) {
                     locationWidget = Text(event['location'], style: const TextStyle(fontSize: 13));
                   } else if (lat != null && lng != null) {
@@ -353,7 +358,6 @@ class _SearchState extends State<Search> {
           height: 120,
           child: Row(
             children: [
-              // Imagen del evento
               Container(
                 height: 120,
                 width: MediaQuery.of(context).size.width * 0.25,
@@ -366,7 +370,6 @@ class _SearchState extends State<Search> {
                 ),
               ),
               const SizedBox(width: 8),
-              // Textos apilados: título, fecha y lugar
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
