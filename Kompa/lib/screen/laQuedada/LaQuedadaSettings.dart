@@ -7,31 +7,71 @@ import '../../providers/AuthProvider.dart';
 import '../../providers/LaQuedadaProvider.dart';
 import '../../config/dark_mode.dart';
 
-class Message_setting extends StatefulWidget {
+class LaQuedadaSettings extends StatefulWidget {
   final String name;
   final String quedadaId;
 
-  const Message_setting({
+  const LaQuedadaSettings({
     super.key,
     required this.name,
     required this.quedadaId,
   });
 
   @override
-  State<Message_setting> createState() => _Message_settingState();
+  State<LaQuedadaSettings> createState() => _LaQuedadaSettingsState();
 }
 
-class _Message_settingState extends State<Message_setting> {
+class _LaQuedadaSettingsState extends State<LaQuedadaSettings> {
   ColorNotifire notifier = ColorNotifire();
-
 
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
-      Provider.of<LaQuedadaProvider>(context, listen: false)
-          .fetchSolicitudesPendientes(widget.quedadaId);
+      final provider = Provider.of<LaQuedadaProvider>(context, listen: false);
+      provider.fetchQuedada(widget.quedadaId);
+      provider.fetchSolicitudesPendientes(widget.quedadaId);
+      provider.fetchMiembrosAceptados(widget.quedadaId);
     });
+  }
+
+  Future<void> _confirmarEliminarMiembro(BuildContext context, Map<String, dynamic> miembro) async {
+    final nombre = miembro['nombre'] ?? '';
+    final apellidos = miembro['apellidos'] ?? '';
+    final usuarioId = miembro['usuarioId'];
+    final notifier = Provider.of<ColorNotifire>(context, listen: false);
+    final provider = Provider.of<LaQuedadaProvider>(context, listen: false);
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: notifier.backGround,
+        title: Text(
+          "Confirmar eliminación",
+          style: TextStyle(color: notifier.textColor, fontFamily: "Ariom-Bold"),
+        ),
+        content: Text(
+          "¿Estás seguro que quieres eliminar a $nombre $apellidos?",
+          style: TextStyle(color: notifier.textColor),
+        ),
+        actions: [
+          TextButton(
+            child: Text("Cancelar", style: TextStyle(color: notifier.buttonColor)),
+            onPressed: () => Navigator.of(ctx).pop(false),
+          ),
+          TextButton(
+            child: Text("Eliminar", style: TextStyle(color: Colors.red)),
+            onPressed: () => Navigator.of(ctx).pop(true),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await provider.eliminarMiembroAceptado(widget.quedadaId, usuarioId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Miembro eliminado")),
+      );
+    }
   }
 
   @override
@@ -70,31 +110,12 @@ class _Message_settingState extends State<Message_setting> {
               Center(
                 child: Text(
                   widget.name,
-                  style:  TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     color: notifier.textColor,
                     fontFamily: "Ariom-Bold",
                   ),
                 ),
-              ),
-              AppConstants.Height(height / 10),
-              Row(
-                children: [
-                  Image.asset(
-                    "assets/notification.png",
-                    scale: 3,
-                    color: notifier.textColor,
-                  ),
-                  AppConstants.Width(width / 40),
-                   Text(
-                    "Mute",
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: notifier.textColor,
-                      fontFamily: "Ariom-Bold",
-                    ),
-                  ),
-                ],
               ),
               AppConstants.Height(height / 20),
               if (quedadaProvider.loadingSolicitudes)
@@ -195,6 +216,88 @@ class _Message_settingState extends State<Message_setting> {
                       fontSize: 16,
                     ),
                   ),
+                ),
+              AppConstants.Height(height / 20),
+              Row(
+                children: [
+                  Image.asset(
+                    "assets/notification.png",
+                    scale: 3,
+                    color: notifier.textColor,
+                  ),
+                  AppConstants.Width(width / 40),
+                  Text(
+                    "Mute",
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: notifier.textColor,
+                      fontFamily: "Ariom-Bold",
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Text(
+                "Miembros aceptados",
+                style: TextStyle(
+                  color: notifier.textColor,
+                  fontSize: 18,
+                  fontFamily: "Ariom-Bold",
+                ),
+              ),
+              const SizedBox(height: 10),
+              if (quedadaProvider.loadingMiembrosAceptados)
+                Center(child: CircularProgressIndicator(color: notifier.buttonColor)),
+              if (!quedadaProvider.loadingMiembrosAceptados && quedadaProvider.miembrosAceptados.isEmpty)
+                Text(
+                  "No hay miembros aceptados",
+                  style: TextStyle(
+                    color: notifier.subtitleTextColor,
+                    fontSize: 16,
+                  ),
+                ),
+              if (!quedadaProvider.loadingMiembrosAceptados && quedadaProvider.miembrosAceptados.isNotEmpty)
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: quedadaProvider.miembrosAceptados.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (ctx, i) {
+                    final miembro = quedadaProvider.miembrosAceptados[i];
+                    final nombre = miembro['nombre'] ?? '';
+                    final apellidos = miembro['apellidos'] ?? '';
+                    final usuarioId = miembro['usuarioId'];
+                    final creadorId = quedadaProvider.quedada?['creadoPor']; // ID del creador
+                    final photo = miembro['photo'];
+
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: notifier.containerColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        leading: photo != null && photo.toString().isNotEmpty
+                            ? CircleAvatar(
+                                backgroundImage: NetworkImage(photo),
+                                radius: 20,
+                              )
+                            : Icon(Icons.person, color: notifier.buttonColor),
+                        title: Text(
+                          "$nombre $apellidos",
+                          style: TextStyle(
+                            color: notifier.textColor,
+                            fontSize: 16,
+                          ),
+                        ),
+                        trailing: (usuarioId != null && usuarioId != creadorId) // Ocultar botón si es el creador
+                            ? IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _confirmarEliminarMiembro(context, miembro),
+                              )
+                            : null,
+                      ),
+                    );
+                  },
                 ),
             ],
           ),

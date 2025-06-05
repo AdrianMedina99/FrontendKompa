@@ -18,6 +18,11 @@ class LaQuedadaProvider extends ChangeNotifier {
   bool loadingMensajes = false;
   String? errorMensajes;
 
+  // Miembros aceptados
+  List<Map<String, dynamic>> miembrosAceptados = [];
+  bool loadingMiembrosAceptados = false;
+  String? errorMiembrosAceptados;
+
   LaQuedadaProvider({required this.apiService});
 
   Future<void> fetchQuedada(String quedadaId) async {
@@ -158,4 +163,47 @@ class LaQuedadaProvider extends ChangeNotifier {
     return "Solicitar unirse";
   }
 
+  // --- NUEVO: Miembros aceptados ---
+  Future<void> fetchMiembrosAceptados(String quedadaId) async {
+    loadingMiembrosAceptados = true;
+    errorMiembrosAceptados = null;
+    notifyListeners();
+    try {
+      final List<dynamic> data = await apiService.getMiembrosAceptados(quedadaId); // Array de IDs
+      miembrosAceptados = await Future.wait(data.map((userId) async {
+        try {
+          final user = await apiService.getClientUser(userId);
+          return {
+            'usuarioId': userId,
+            'nombre': user['nombre'] ?? 'Usuario desconocido',
+            'apellidos': user['apellidos'] ?? '',
+            'photo': user['photo'], // Cargar foto también
+          };
+        } catch (_) {
+          return {
+            'usuarioId': userId,
+            'nombre': 'Usuario desconocido',
+            'apellidos': '',
+            'photo': null,
+          };
+        }
+      }));
+    } catch (e) {
+      errorMiembrosAceptados = e.toString();
+      miembrosAceptados = [];
+    }
+    loadingMiembrosAceptados = false;
+    notifyListeners();
+  }
+
+  Future<void> eliminarMiembroAceptado(String quedadaId, String usuarioId) async {
+    try {
+      await apiService.eliminarMiembroAceptado(quedadaId, usuarioId);
+      miembrosAceptados.removeWhere((m) => m['usuarioId'] == usuarioId);
+      notifyListeners();
+    } catch (e) {
+      // Manejo de error opcional
+    }
+  }
 }
+

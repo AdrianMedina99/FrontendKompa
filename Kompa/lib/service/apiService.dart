@@ -934,5 +934,41 @@ class ApiService {
     }
   }
 
+  // Listar miembros aceptados de una quedada
+  Future<List<String>> getMiembrosAceptados(String quedadaId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/quedadas/$quedadaId/miembros-aceptados'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return List<String>.from(data);
+    } else {
+      throw Exception('Error al obtener miembros aceptados: ${response.body}');
+    }
+  }
+
+  // Eliminar un miembro aceptado de una quedada
+  Future<void> eliminarMiembroAceptado(String quedadaId, String userId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/quedadas/$quedadaId/eliminar-miembro?userId=$userId'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Error al eliminar miembro aceptado: ${response.body}');
+    }
+  }
+
+// Eliminar una quedada
+  Future<void> eliminarQuedada(String quedadaId) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/api/quedadas/$quedadaId'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Error al eliminar quedada: ${response.body}');
+    }
+  }
+
 }
 
