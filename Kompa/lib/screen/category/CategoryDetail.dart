@@ -223,31 +223,6 @@ class _CategoryDetailState extends State<CategoryDetail> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Search(),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    alignment: Alignment.center,
-                    height: height / 14,
-                    width: width / 7,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: notifier.buttonColor,
-                    ),
-                    child: Image.asset(
-                      "assets/Search.png",
-                      scale: 2.5,
-                      color: notifier.buttonTextColor,
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

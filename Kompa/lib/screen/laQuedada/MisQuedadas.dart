@@ -5,17 +5,17 @@ import 'package:geocoding/geocoding.dart';
 import '../../config/dark_mode.dart';
 import '../../providers/AuthProvider.dart';
 import '../../providers/LaQuedadaProvider.dart';
-import 'message_detail.dart';
+import 'ChatLaQuedada.dart';
 
-class message extends StatefulWidget {
+class MisQuedadas extends StatefulWidget {
   final String userId;
-  const message({super.key, required this.userId});
+  const MisQuedadas({super.key, required this.userId});
 
   @override
-  State<message> createState() => _messageState();
+  State<MisQuedadas> createState() => _MisQuedadasState();
 }
 
-class _messageState extends State<message> {
+class _MisQuedadasState extends State<MisQuedadas> {
   ColorNotifire notifier = ColorNotifire();
   final Map<String, String> _cityCache = {};
 
@@ -143,7 +143,7 @@ class _messageState extends State<message> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (_) => MessageDetail(
+                                            builder: (_) => ChatLaQuedada(
                                               image: "assets/Avtar 1.png",
                                               name: q['titulo'] ?? "Quedada",
                                               quedadaId: q['id'],
@@ -246,6 +246,8 @@ class _messageState extends State<message> {
     GoogleMapController? _mapController;
     String? _ubicacionError;
 
+    final notifier = Provider.of<ColorNotifire>(context, listen: false);
+
     Future<void> _searchLocation() async {
       final query = _searchController.text.trim();
       if (query.isEmpty) return;
@@ -275,6 +277,7 @@ class _messageState extends State<message> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: notifier.backGround,
       builder: (ctx) {
         return Padding(
           padding: EdgeInsets.only(
@@ -289,22 +292,92 @@ class _messageState extends State<message> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("Crear Quedada", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text(
+                        "Crear Quedada",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: notifier.textColor,
+                          fontFamily: "Ariom-Bold",
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       TextFormField(
                         controller: _tituloController,
-                        decoration: InputDecoration(labelText: "Título *"),
+                        style: TextStyle(
+                          color: notifier.textColor,
+                          fontFamily: "Ariom-Bold",
+                          fontSize: 16,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: "Título *",
+                          labelStyle: TextStyle(
+                            color: notifier.textColor,
+                            fontFamily: "Ariom-Bold",
+                          ),
+                          filled: true,
+                          fillColor: notifier.textFieldBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: notifier.buttonColor),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: notifier.buttonColor),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: notifier.buttonColor, width: 2),
+                          ),
+                        ),
                         validator: (v) => v == null || v.isEmpty ? "Obligatorio" : null,
                       ),
+                      const SizedBox(height: 12),
                       TextFormField(
                         controller: _descripcionController,
-                        decoration: InputDecoration(labelText: "Descripción"),
+                        style: TextStyle(
+                          color: notifier.textColor,
+                          fontFamily: "Roboto",
+                          fontSize: 15,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: "Descripción",
+                          labelStyle: TextStyle(
+                            color: notifier.textColor,
+                            fontFamily: "Roboto",
+                          ),
+                          filled: true,
+                          fillColor: notifier.textFieldBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: notifier.buttonColor),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: notifier.buttonColor),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: notifier.buttonColor, width: 2),
+                          ),
+                        ),
+                        maxLines: 2,
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       ListTile(
-                        title: Text(_horaEncuentro == null
-                            ? "Selecciona fecha y hora de encuentro"
-                            : "${_horaEncuentro!.day}/${_horaEncuentro!.month}/${_horaEncuentro!.year} ${_horaEncuentro!.hour.toString().padLeft(2, '0')}:${_horaEncuentro!.minute.toString().padLeft(2, '0')}"),
-                        trailing: Icon(Icons.calendar_today),
+                        tileColor: notifier.textFieldBackground,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        title: Text(
+                          _horaEncuentro == null
+                              ? "Selecciona fecha y hora de encuentro"
+                              : "${_horaEncuentro!.day}/${_horaEncuentro!.month}/${_horaEncuentro!.year} ${_horaEncuentro!.hour.toString().padLeft(2, '0')}:${_horaEncuentro!.minute.toString().padLeft(2, '0')}",
+                          style: TextStyle(
+                            color: notifier.textColor,
+                            fontFamily: "Roboto",
+                            fontSize: 15,
+                          ),
+                        ),
+                        trailing: Icon(Icons.calendar_today, color: notifier.buttonColor),
                         onTap: () async {
                           final date = await showDatePicker(
                             context: context,
@@ -327,13 +400,35 @@ class _messageState extends State<message> {
                           }
                         },
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       TextField(
                         controller: _searchController,
+                        style: TextStyle(
+                          color: notifier.textColor,
+                          fontFamily: "Roboto",
+                        ),
                         decoration: InputDecoration(
                           labelText: 'Buscar calle o pueblo',
+                          labelStyle: TextStyle(
+                            color: notifier.textColor,
+                            fontFamily: "Roboto",
+                          ),
+                          filled: true,
+                          fillColor: notifier.textFieldBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: notifier.buttonColor),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: notifier.buttonColor),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: notifier.buttonColor, width: 2),
+                          ),
                           suffixIcon: IconButton(
-                            icon: Icon(Icons.search),
+                            icon: Icon(Icons.search, color: notifier.buttonColor),
                             onPressed: () async {
                               await _searchLocation();
                               setModalState(() {});
@@ -345,8 +440,7 @@ class _messageState extends State<message> {
                           setModalState(() {});
                         },
                       ),
-                      SizedBox(height: 10),
-
+                      const SizedBox(height: 10),
                       // MAPA
                       SizedBox(
                         height: 180,
@@ -375,21 +469,41 @@ class _messageState extends State<message> {
                           ),
                         ),
                       ),
-
                       if (_ubicacionError != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
-                          child: Text(_ubicacionError!, style: TextStyle(color: Colors.red)),
+                          child: Text(
+                            _ubicacionError!,
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontFamily: "Roboto",
+                            ),
+                          ),
                         ),
-
-                      SizedBox(height: 18),
+                      const SizedBox(height: 18),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          foregroundColor: Colors.white,
+                          backgroundColor: notifier.buttonColor,
+                          foregroundColor: notifier.buttonTextColor,
                           minimumSize: Size(double.infinity, 44),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          textStyle: TextStyle(
+                            fontFamily: "Ariom-Bold",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
-                        child: Text("Crear quedada"),
+                        child: Text(
+                          "Crear quedada",
+                          style: TextStyle(
+                            color: notifier.buttonTextColor,
+                            fontFamily: "Ariom-Bold",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                         onPressed: () async {
                           if (!_formKey.currentState!.validate()) return;
                           if (_horaEncuentro == null) {
@@ -423,7 +537,7 @@ class _messageState extends State<message> {
                           }
                         },
                       ),
-                      SizedBox(height: 18),
+                      const SizedBox(height: 18),
                     ],
                   ),
                 ),
@@ -449,4 +563,3 @@ class _messageState extends State<message> {
     return "Sin hora";
   }
 }
-

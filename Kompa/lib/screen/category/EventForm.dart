@@ -6,17 +6,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 
 import '../../config/dark_mode.dart';
 import '../../providers/AuthProvider.dart';
 import '../../providers/HomeProvider.dart';
 
 class EventForm extends StatefulWidget {
-
-  // ===========
-  // Variables
-  // ===========
   final String categoryId;
   final String categoryTitle;
 
@@ -39,19 +34,16 @@ class _EventFormState extends State<EventForm> {
   final TextEditingController _capacityController = TextEditingController();
   final TextEditingController _languageController = TextEditingController();
   final TextEditingController _edadController = TextEditingController();
-  final TextEditingController _searchLocationController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(hours: 2));
 
   double? _latitude;
   double? _longitude;
-  String _addressText = "Selecciona una ubicación en el mapa";
-  String? _address;
-  double? _currentLat;
-  double? _currentLng;
   Set<Marker> _markers = {};
   GoogleMapController? _mapController;
+  String? _ubicacionError;
 
   bool _isLoading = false;
   String _errorMessage = '';
@@ -60,107 +52,45 @@ class _EventFormState extends State<EventForm> {
   final ImagePicker _picker = ImagePicker();
 
   @override
-  void initState() {
-    super.initState();
-    _initializeLocation();
-  }
-
-  @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
     _capacityController.dispose();
     _languageController.dispose();
     _edadController.dispose();
-    _searchLocationController.dispose();
+    _searchController.dispose();
     _mapController?.dispose();
     super.dispose();
   }
 
-  /// Metodo para inicializar la ubicación para el mapa
-  Future<void> _initializeLocation() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          throw 'Permiso de ubicación denegado';
-        }
-      }
-      
-      if (permission == LocationPermission.deniedForever) {
-        throw 'Los permisos de ubicación están permanentemente denegados';
-      }
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high
-      );
-      
-      setState(() {
-        _currentLat = position.latitude;
-        _currentLng = position.longitude;
-      });
-
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-        _currentLat = 40.416775;
-        _currentLng = -3.703790;
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  /// Metodo para buscar una ubicación por texto
   Future<void> _searchLocation() async {
-    final searchText = _searchLocationController.text.trim();
-    if (searchText.isEmpty) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
+    final query = _searchController.text.trim();
+    if (query.isEmpty) return;
     try {
-      List<Location> locations = await locationFromAddress(searchText);
+      List<Location> locations = await locationFromAddress(query);
       if (locations.isNotEmpty) {
-        final location = locations.first;
-        final newLatLng = LatLng(location.latitude, location.longitude);
-        _mapController?.animateCamera(CameraUpdate.newLatLngZoom(newLatLng, 14));
-        
+        final loc = locations.first;
         setState(() {
-          _latitude = location.latitude;
-          _longitude = location.longitude;
-          _markers.clear();
-          _markers.add(Marker(
-            markerId: const MarkerId('searchedLocation'),
-            position: newLatLng,
-          ));
+          _latitude = loc.latitude;
+          _longitude = loc.longitude;
+          _markers = {
+            Marker(
+              markerId: MarkerId('searchedLocation'),
+              position: LatLng(loc.latitude, loc.longitude),
+            ),
+          };
         });
-        
-        await _getAddressFromLatLng(location.latitude, location.longitude);
-      } else {
-        setState(() {
-          _errorMessage = 'No se encontró la ubicación';
-        });
+        _mapController?.animateCamera(
+          CameraUpdate.newLatLngZoom(LatLng(loc.latitude, loc.longitude), 15),
+        );
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Error al buscar la ubicación: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se encontró la ubicación')),
+      );
     }
   }
 
-  /// Metodo para seleccionar una imagen desde la galería
   Future<void> _selectImage() async {
     final XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,
@@ -175,7 +105,6 @@ class _EventFormState extends State<EventForm> {
     }
   }
 
-  /// Metodo para seleccionar fecha y hora
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -214,143 +143,6 @@ class _EventFormState extends State<EventForm> {
     }
   }
 
-  Widget _buildLocationSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Ubicación del evento",
-          style: TextStyle(
-            color: notifier.textColor,
-            fontFamily: "Ariom-Bold",
-            fontSize: 16,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _searchLocationController,
-                style: TextStyle(color: notifier.textColor),
-                decoration: InputDecoration(
-                  hintText: "Buscar ubicación (ej: Sevilla, España)",
-                  hintStyle: TextStyle(color: notifier.hintTextColor),
-                  filled: true,
-                  fillColor: notifier.textFieldBackground,
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: notifier.textColor.withOpacity(0.3)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: notifier.buttonColor),
-                  ),
-                ),
-                onEditingComplete: _searchLocation,
-              ),
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: notifier.buttonColor,
-                foregroundColor: notifier.buttonTextColor,
-                shape: const CircleBorder(),
-                padding: const EdgeInsets.all(12),
-              ),
-              onPressed: _searchLocation,
-              child: const Icon(Icons.search),
-            ),
-          ],
-        ),
-        
-        const SizedBox(height: 12),
-        
-        Container(
-          height: 200,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: notifier.textColor),
-          ),
-          child: Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(_currentLat ?? 40.416775, _currentLng ?? -3.703790),
-                    zoom: 14,
-                  ),
-                  onTap: (LatLng position) {
-                    setState(() {
-                      _latitude = position.latitude;
-                      _longitude = position.longitude;
-                      _markers.clear();
-                      _markers.add(Marker(
-                        markerId: const MarkerId('selectedLocation'),
-                        position: position,
-                      ));
-                    });
-                    _getAddressFromLatLng(position.latitude, position.longitude);
-                  },
-                  markers: _markers,
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                  },
-                ),
-              ),
-              Positioned(
-                top: 8,
-                left: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Text(
-                    "Toca el mapa para elegir ubicación",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          _address ?? "Toca el mapa para seleccionar ubicación",
-          style: TextStyle(color: notifier.inv, fontSize: 14),
-        ),
-      ],
-    );
-  }
-
-  /// Metodo para obtener la dirección a partir de coordenadas
-  Future<void> _getAddressFromLatLng(double lat, double lng) async {
-    try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks.first;
-        setState(() {
-          _address = "${place.street}, ${place.locality}, ${place.country}";
-          _addressText = _address ?? "Dirección seleccionada";
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _address = "No se pudo obtener la dirección";
-        _addressText = _address ?? "Error al obtener dirección";
-      });
-    }
-  }
-
-  /// Metodo para enviar el formulario
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -365,7 +157,7 @@ class _EventFormState extends State<EventForm> {
 
     if (_latitude == null || _longitude == null) {
       setState(() {
-        _errorMessage = 'Por favor, selecciona una ubicación para el evento tocando el mapa';
+        _ubicacionError = 'Por favor, selecciona una ubicación para el evento tocando el mapa';
       });
       return;
     }
@@ -398,7 +190,7 @@ class _EventFormState extends State<EventForm> {
         'ageRestriction': _edadController.text,
         'latitud': _latitude,
         'longitud': _longitude,
-        'location': _addressText,
+        'location': 'Ubicación seleccionada',
         'categoryId': widget.categoryId,
         'createFor': userId,
       };
@@ -721,7 +513,92 @@ class _EventFormState extends State<EventForm> {
               ),
               const SizedBox(height: 24),
 
-              _buildLocationSelector(),
+              Text(
+                "Ubicación del evento",
+                style: TextStyle(
+                  color: notifier.textColor,
+                  fontFamily: "Ariom-Bold",
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _searchController,
+                style: TextStyle(
+                  color: notifier.textColor,
+                  fontFamily: "Roboto",
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Buscar calle o pueblo',
+                  labelStyle: TextStyle(
+                    color: notifier.textColor,
+                    fontFamily: "Roboto",
+                  ),
+                  filled: true,
+                  fillColor: notifier.textFieldBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: notifier.buttonColor),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: notifier.buttonColor),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: notifier.buttonColor, width: 2),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.search, color: notifier.buttonColor),
+                    onPressed: () async {
+                      await _searchLocation();
+                    },
+                  ),
+                ),
+                onSubmitted: (_) async {
+                  await _searchLocation();
+                },
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 180,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(_latitude ?? 40.416775, _longitude ?? -3.703790),
+                      zoom: 13,
+                    ),
+                    onTap: (pos) {
+                      setState(() {
+                        _latitude = pos.latitude;
+                        _longitude = pos.longitude;
+                        _markers = {
+                          Marker(markerId: MarkerId("evento"), position: pos)
+                        };
+                        _ubicacionError = null;
+                      });
+                    },
+                    markers: _markers,
+                    myLocationEnabled: true,
+                    onMapCreated: (controller) {
+                      _mapController = controller;
+                    },
+                  ),
+                ),
+              ),
+              if (_ubicacionError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    _ubicacionError!,
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontFamily: "Roboto",
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 18),
 
               if (_errorMessage.isNotEmpty)
                 Padding(
@@ -743,7 +620,16 @@ class _EventFormState extends State<EventForm> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: _isLoading ? null : _submitForm,
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          if (!_formKey.currentState!.validate()) return;
+                          if (_latitude == null || _longitude == null) {
+                            setState(() => _ubicacionError = "Selecciona ubicación en el mapa");
+                            return;
+                          }
+                          await _submitForm();
+                        },
                   child: Text(
                     _isLoading ? "Creando evento..." : "Crear evento",
                     style: const TextStyle(
@@ -762,4 +648,3 @@ class _EventFormState extends State<EventForm> {
     );
   }
 }
-

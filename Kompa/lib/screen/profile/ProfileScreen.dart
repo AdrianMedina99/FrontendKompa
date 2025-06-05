@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../providers/AuthProvider.dart';
 import '../../providers/HomeProvider.dart';
 import '../../providers/RatingProvider.dart';
-import '../../widget/ExpandableInfoCard.dart';
 import '../Home/EventDetailScreen.dart';
 import './SettingScreen.dart';
 import '../Profile/share_profile.dart';

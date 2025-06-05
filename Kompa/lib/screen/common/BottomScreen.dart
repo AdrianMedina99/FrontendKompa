@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../config/dark_mode.dart';
 import '../Home/HomeScreen.dart';
 import '../category/CategoryScreen.dart';
-import '../laQuedada/message.dart';
+import '../laQuedada/MisQuedadas.dart';
 import '../profile/ProfileScreen.dart';
 import '../../providers/AuthProvider.dart';
 
@@ -38,7 +38,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
         : [
             const Home(),
             const CategoryScreen(),
-            message(userId: userId ?? ''),
+            MisQuedadas(userId: userId ?? ''),
             const profile(),
           ];
 

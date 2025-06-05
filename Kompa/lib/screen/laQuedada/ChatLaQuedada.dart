@@ -2,7 +2,7 @@
 
 import 'package:kompa/config/AppConstants.dart';
 import 'package:flutter/material.dart';
-import 'package:kompa/screen/laQuedada/setting.dart';
+import 'package:kompa/screen/laQuedada/LaQuedadaSettings.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import '../../config/dark_mode.dart';
@@ -10,14 +10,14 @@ import '../../providers/AuthProvider.dart';
 import '../../providers/LaQuedadaProvider.dart';
 import '../../service/apiService.dart';
 
-class MessageDetail extends StatefulWidget {
+class ChatLaQuedada extends StatefulWidget {
   final String image;
   final String name;
   final String quedadaId;
   final String userId;
   final String creadoPor;
 
-  const MessageDetail({
+  const ChatLaQuedada({
     super.key,
     required this.image,
     required this.name,
@@ -27,10 +27,10 @@ class MessageDetail extends StatefulWidget {
   });
 
   @override
-  State<MessageDetail> createState() => _MessageDetailState();
+  State<ChatLaQuedada> createState() => _ChatLaQuedadaState();
 }
 
-class _MessageDetailState extends State<MessageDetail> {
+class _ChatLaQuedadaState extends State<ChatLaQuedada> {
   ColorNotifire notifier = ColorNotifire();
   final TextEditingController _controller = TextEditingController();
   bool _sending = false;
@@ -181,7 +181,7 @@ class _MessageDetailState extends State<MessageDetail> {
               } else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => Message_setting(
+                  MaterialPageRoute(builder: (_) => LaQuedadaSettings(
                     name: widget.name,
                     quedadaId: widget.quedadaId,
                   )),

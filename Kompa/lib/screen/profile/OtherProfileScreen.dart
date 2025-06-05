@@ -10,6 +10,8 @@ import '../common/BottomScreen.dart';
 import 'ListFriendScreen.dart';
 import 'ReviewsScreen.dart';
 import '../laQuedada/LaQuedadaList.dart';
+import '../Home/EventDetailScreen.dart';
+
 
 class OtherProfileScreen extends StatefulWidget {
   //=========
@@ -718,7 +720,12 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
 
                 return InkWell(
                   onTap: () {
-                    //Detalle del evento
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Event_detail(eventId: event['id']),
+                      ),
+                    );
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -779,6 +786,3 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
     );
   }
 }
-
-
-
