@@ -233,7 +233,6 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      print("Datos del cliente obtenidos: $data");
       return data;
     } else {
       throw Exception('Error al obtener usuario cliente: ${response.body}');
@@ -787,4 +786,153 @@ class ApiService {
       throw Exception('Error al obtener seguidores: ${response.body}');
     }
   }
+
+  // QUEDADAS
+
+// Crear una quedada
+  Future<String> crearQuedada(Map<String, dynamic> quedadaData) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/quedadas'),
+      headers: _getHeaders(),
+      body: jsonEncode(quedadaData),
+    );
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Error al crear quedada: ${response.body}');
+    }
+  }
+
+// Obtener una quedada por ID
+  Future<Map<String, dynamic>?> getQuedada(String id) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/quedadas/$id'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else if (response.statusCode == 404) {
+      return null;
+    } else {
+      throw Exception('Error al obtener quedada: ${response.body}');
+    }
+  }
+
+// Listar quedadas por creador
+  Future<List<dynamic>> getQuedadasPorCreador(String userId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/quedadas/creador/$userId'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al listar quedadas: ${response.body}');
+    }
+  }
+
+  // Listar quedadas donde el usuario es miembro (aceptado o pendiente)
+  Future<List<dynamic>> getQuedadasPorMiembro(String userId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/quedadas/miembro/$userId'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al listar quedadas como miembro: ${response.body}');
+    }
+  }
+
+// Aceptar solicitud de quedada
+  Future<void> aceptarSolicitudQuedada(String quedadaId, String userId, String solicitanteId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/quedadas/$quedadaId/aceptar?userId=$userId&solicitanteId=$solicitanteId'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Error al aceptar solicitud: ${response.body}');
+    }
+  }
+
+// Rechazar solicitud de quedada
+  Future<void> rechazarSolicitudQuedada(String quedadaId, String userId, String solicitanteId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/quedadas/$quedadaId/rechazar?userId=$userId&solicitanteId=$solicitanteId'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Error al rechazar solicitud: ${response.body}');
+    }
+  }
+
+// Obtener solicitudes pendientes de una quedada
+  Future<List<dynamic>> getSolicitudesPendientesPorQuedada(String quedadaId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/solicitudes_quedada?quedadaId=$quedadaId&estado=pendiente'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener solicitudes pendientes: ${response.body}');
+    }
+  }
+
+
+
+// SOLICITUDES DE QUEDADA
+
+// Solicitar unirse a una quedada
+  Future<String> solicitarUnirseAQuedada(String quedadaId, String usuarioId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/solicitudes_quedada?quedadaId=$quedadaId&usuarioId=$usuarioId'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Error al solicitar unirse: ${response.body}');
+    }
+  }
+
+// Actualizar estado de solicitud (aceptado, rechazado, etc)
+  Future<void> actualizarEstadoSolicitud(String solicitudId, String estado) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/api/solicitudes_quedada/$solicitudId?estado=$estado'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Error al actualizar estado de solicitud: ${response.body}');
+    }
+  }
+
+// CHAT DE QUEDADA
+
+// Enviar mensaje al chat de una quedada
+  Future<void> enviarMensajeChatQuedada(String quedadaId, Map<String, dynamic> mensajeData) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/quedadas/$quedadaId/chat'),
+      headers: _getHeaders(),
+      body: jsonEncode(mensajeData),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Error al enviar mensaje: ${response.body}');
+    }
+  }
+
+  // Obtener mensajes del chat de una quedada
+  Future<List<dynamic>> getMensajesChatQuedada(String quedadaId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/quedadas/$quedadaId/chat'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener mensajes del chat: ${response.body}');
+    }
+  }
+
 }
+
