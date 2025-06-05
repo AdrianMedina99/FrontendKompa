@@ -1,79 +1,164 @@
-// ignore_for_file: file_names, camel_case_types
+// ignore_for_file: file_names
 
 import 'package:kompa/config/AppConstants.dart';
 import 'package:flutter/material.dart';
+import 'package:kompa/screen/laQuedada/setting.dart';
 import 'package:provider/provider.dart';
-
+import 'dart:async';
 import '../../config/dark_mode.dart';
-import 'call.dart';
-import 'setting.dart';
+import '../../providers/AuthProvider.dart';
+import '../../providers/LaQuedadaProvider.dart';
+import '../../service/apiService.dart';
 
-class Message_detail extends StatefulWidget {
+class MessageDetail extends StatefulWidget {
   final String image;
   final String name;
+  final String quedadaId;
+  final String userId;
+  final String creadoPor;
 
-  const Message_detail({
+  const MessageDetail({
     super.key,
     required this.image,
     required this.name,
+    required this.quedadaId,
+    required this.userId,
+    required this.creadoPor,
   });
 
   @override
-  State<Message_detail> createState() => _Message_detailState();
+  State<MessageDetail> createState() => _MessageDetailState();
 }
 
-class _Message_detailState extends State<Message_detail> {
+class _MessageDetailState extends State<MessageDetail> {
   ColorNotifire notifier = ColorNotifire();
+  final TextEditingController _controller = TextEditingController();
+  bool _sending = false;
+  Map<String, Map<String, String>> _userNamesCache = {};
+  Timer? _timer;
+  List<Map<String, dynamic>> _currentMessages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startListeningToMessages();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startListeningToMessages() {
+    _fetchMessages(); // Carga inicial
+    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      _fetchMessages();
+    });
+  }
+
+  Future<void> _fetchMessages() async {
+    try {
+      final provider = Provider.of<LaQuedadaProvider>(context, listen: false);
+      await provider.fetchMensajesQuedada(widget.quedadaId);
+
+      final newMessages = List<Map<String, dynamic>>.from(provider.mensajes);
+
+      if (_areMessagesDifferent(newMessages)) {
+        setState(() {
+          _currentMessages = newMessages;
+        });
+        _preloadUserNames(newMessages);
+      }
+    } catch (_) {
+      // Error opcionalmente manejado
+    }
+  }
+
+  bool _areMessagesDifferent(List<Map<String, dynamic>> newMessages) {
+    if (newMessages.length != _currentMessages.length) return true;
+    for (int i = 0; i < newMessages.length; i++) {
+      if (newMessages[i]['id'] != _currentMessages[i]['id']) return true;
+    }
+    return false;
+  }
+
+  Future<void> _preloadUserNames(List<Map<String, dynamic>> messages) async {
+    final ids = messages.map((msg) => msg['enviadoPor'] ?? msg['usuarioId']).toSet();
+
+    for (var id in ids) {
+      if (!_userNamesCache.containsKey(id)) {
+        final user = await _getUserName(id);
+        if (mounted) {
+          setState(() {
+            _userNamesCache[id] = user;
+          });
+        }
+      }
+    }
+  }
+
+  Future<Map<String, String>> _getUserName(String userId) async {
+    if (_userNamesCache.containsKey(userId)) {
+      return _userNamesCache[userId]!;
+    }
+
+    if (!mounted) return {'nombre': '', 'apellidos': ''};
+
+    final user = await Provider.of<AuthProvider>(context, listen: false)
+        .apiService
+        .getClientUser(userId);
+    return {
+      'nombre': user['nombre'] ?? '',
+      'apellidos': user['apellidos'] ?? '',
+    };
+  }
+
+  Future<void> _enviarMensaje() async {
+    final texto = _controller.text.trim();
+    if (texto.isEmpty) return;
+
+    setState(() => _sending = true);
+
+    try {
+      await Provider.of<LaQuedadaProvider>(context, listen: false)
+          .enviarMensajeQuedada(widget.quedadaId, {
+        "mensaje": texto,
+        "enviadoPor": widget.userId,
+      });
+      _controller.clear();
+    } catch (_) {
+      // Error opcionalmente manejado
+    }
+
+    if (mounted) setState(() => _sending = false);
+  }
 
   @override
   Widget build(BuildContext context) {
     notifier = Provider.of<ColorNotifire>(context, listen: true);
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      backgroundColor: notifier.backGround,
+      backgroundColor: notifier.chatBackground,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: notifier.backGround,
         elevation: 0,
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             InkWell(
-              onTap: () {
-                Navigator.pop(context);
-              },
+              onTap: () => Navigator.pop(context),
               child: Image.asset(
                 "assets/arrow-left.png",
                 scale: 3,
                 color: notifier.textColor,
               ),
             ),
-            InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Message_setting(
-                      image: widget.image,
-                      name: widget.name,
-                    ),
-                  ),
-                );
-              },
-              child: Container(
-                alignment: Alignment.center,
-                height: height / 17,
-                width: width / 5,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: AssetImage(widget.image),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
+            const SizedBox(width: 10),
             Text(
               widget.name,
               style: TextStyle(
@@ -85,274 +170,177 @@ class _Message_detailState extends State<Message_detail> {
           ],
         ),
         actions: [
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => call(
-                    image: widget.image,
+          IconButton(
+            icon: Icon(Icons.settings, color: notifier.buttonColor),
+            onPressed: () {
+              final auth = Provider.of<AuthProvider>(context, listen: false);
+              if (auth.userId != widget.creadoPor) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('No eres el admin de este grupo')),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => Message_setting(
                     name: widget.name,
-                  ),
-                ),
-              );
+                    quedadaId: widget.quedadaId,
+                  )),
+                );
+              }
             },
-            child: Image.asset(
-              "assets/Call.png",
-              scale: 3,
-              color: notifier.textColor,
-            ),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(
-          left: 10,
-          right: 10,
-        ),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppConstants.Height(height / 30),
-              Center(
-                child: Text(
-                  "today, Jul 10",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: notifier.textColor,
-                  ),
-                ),
-              ),
-              AppConstants.Height(height / 30),
-              Container(
-                height: height / 15,
-                width: width / 2,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(15),
-                    topLeft: Radius.circular(15),
-                    bottomRight: Radius.circular(15),
-                  ),
-                  color: notifier.textColor,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 10,
-                    right: 10,
-                    top: 10,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Hey! Cool picture 🙃 where is that?",
-                        style: TextStyle(
-                          color: notifier.backGround,
-                          fontSize: 16,
-                          fontFamily: "Areta-Regular",
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              AppConstants.Height(height / 90),
-              Text(
-                "14:45",
+      body: Column(
+        children: [
+          Expanded(
+            child: _currentMessages.isEmpty
+                ? Center(
+              child: Text(
+                "No hay mensajes",
                 style: TextStyle(
-                  fontSize: 15,
-                  color: notifier.subtitleTextColor,
-                  fontFamily: "Areta-Regular",
+                  color: notifier.textColor,
+                  fontSize: 16,
                 ),
               ),
-              AppConstants.Height(height / 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    height: height / 14,
-                    width: width / 1.7,
-                    decoration: const BoxDecoration(
+            )
+                : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+              itemCount: _currentMessages.length,
+              itemBuilder: (context, index) {
+                final msg = _currentMessages[index];
+                final enviadoPor = msg['enviadoPor'] ?? msg['usuarioId'];
+                final esMio = enviadoPor == widget.userId;
+                final contenido = msg['mensaje'] ?? "";
+                final fecha = msg['timestamp'];
+                String hora = "";
+
+                if (fecha != null) {
+                  try {
+                    final dt = DateTime.parse(fecha);
+                    hora = "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
+                  } catch (_) {}
+                }
+
+                final nombre = _userNamesCache[enviadoPor]?['nombre'] ?? "Usuario";
+                final apellido = _userNamesCache[enviadoPor]?['apellidos'] ?? "";
+
+                return Align(
+                  alignment: esMio ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: esMio
+                          ? notifier.buttonColor
+                          : notifier.chatBackgroundMessage,
                       borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(15),
-                        topLeft: Radius.circular(15),
-                        bottomLeft: Radius.circular(15),
+                        topLeft: const Radius.circular(16),
+                        topRight: const Radius.circular(16),
+                        bottomLeft: Radius.circular(esMio ? 16 : 0),
+                        bottomRight: Radius.circular(esMio ? 0 : 16),
                       ),
-                      color: Color(0xffB6B6C0),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "$nombre $apellido",
+                          style: TextStyle(
+                            fontFamily: 'Roboto',
+                            color: esMio
+                                ? notifier.buttonTextColor
+                                : notifier.backGround,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        Text(
+                          contenido,
+                          style: TextStyle(
+                            fontFamily: 'Roboto',
+                            color: esMio
+                                ? notifier.buttonTextColor
+                                : notifier.backGround,
+                            fontSize: 17,
+                          ),
+                        ),
+                        if (hora.isNotEmpty)
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Text(
+                              hora,
+                              style: TextStyle(
+                                color: notifier.subtitleTextColor,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Container(
+            color: notifier.backGround,
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: notifier.backGround,
+                      border: Border.all(color: notifier.buttonColor),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.only(
-                        left: 10,
-                        right: 10,
-                        top: 7,
-                      ),
-                      child: Text(
-                        "Hi! I recently traveled through Quang Ninh and there were views like this",
-                        style: TextStyle(
-                          color: notifier.textColor,
-                          fontSize: 16,
-                          fontFamily: "Areta-Regular",
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: TextField(
+                        controller: _controller,
+                        enabled: !_sending,
+                        style: const TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 17,
                         ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Escribe tu mensaje...",
+                          hintStyle: TextStyle(
+                            fontFamily: 'Roboto',
+                            color: notifier.textColor,
+                            fontSize: 17,
+                          ),
+                        ),
+                        onSubmitted: (_) => _enviarMensaje(),
                       ),
                     ),
                   ),
-                ],
-              ),
-              AppConstants.Height(height / 90),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    "14:46",
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: notifier.subtitleTextColor,
-                      fontFamily: "Areta-Regular",
+                ),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: _sending ? null : _enviarMensaje,
+                  child: Container(
+                    height: height / 14,
+                    width: width / 8,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: notifier.textColor,
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        "assets/Send.png",
+                        scale: 3,
+                        color: notifier.imageColor,
+                      ),
                     ),
                   ),
-                ],
-              ),
-              AppConstants.Height(height / 30),
-              Container(
-                height: height / 15.5,
-                width: width / 1.7,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(15),
-                    topLeft: Radius.circular(15),
-                    bottomRight: Radius.circular(15),
-                  ),
-                  color: notifier.textColor,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 10,
-                    right: 20,
-                    top: 20,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "yeah! I love to travel too 😊",
-                        style: TextStyle(
-                          color: notifier.backGround,
-                          fontSize: 16,
-                          fontFamily: "Areta-Regular",
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              AppConstants.Height(height / 90),
-              Text(
-                "14:45",
-                style: TextStyle(
-                  fontSize: 15,
-                  color: notifier.subtitleTextColor,
-                  fontFamily: "Areta-Regular",
-                ),
-              ),
-              AppConstants.Height(height / 30),
-              Container(
-                height: height / 15,
-                width: width / 1.5,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(15),
-                    topLeft: Radius.circular(15),
-                    bottomRight: Radius.circular(15),
-                  ),
-                  color: notifier.textColor,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 10,
-                    right: 20,
-                    top: 15,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "listen, tell me. Where have you been recently?",
-                        style: TextStyle(
-                          color: notifier.backGround,
-                          fontSize: 16,
-                          fontFamily: "Areta-Regular",
-                        ),
-                      ),
-
-                    ],
-                  ),
-                ),
-              ),
-              AppConstants.Height(height / 90),
-              Text(
-                "14:45",
-                style: TextStyle(
-                  fontSize: 15,
-                  color: notifier.subtitleTextColor,
-                  fontFamily: "Areta-Regular",
-                ),
-              ),
-              AppConstants.Height(height / 10),
-            ],
-          ),
-        ),
-      ),
-      bottomSheet: Container(
-        color: notifier.backGround,
-        padding: const EdgeInsets.only(left: 15, right: 15),
-        child: ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Image.asset(
-            "assets/Link.png",
-            scale: 3,
-            color: notifier.textColor,
-          ),
-          title: Container(
-            height: height / 13,
-            width: width / 4,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: const Color(0xffFDFEF3),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.only(
-                top: 6,
-                left: 10,
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Type your text here",
-                  hintStyle: TextStyle(
-                    color: Color(0xff6C6D80),
-                  ),
-                ),
-              ),
+              ],
             ),
           ),
-          trailing: Container(
-            height: height / 14,
-            width: width / 8,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: notifier.textColor,
-            ),
-            child: Center(
-              child: Image.asset(
-                "assets/Send.png",
-                scale: 3,
-                color: notifier.imageColor,
-              ),
-            ),
-          ),
-        ),
+        ],
       ),
     );
   }

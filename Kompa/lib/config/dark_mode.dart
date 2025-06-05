@@ -16,8 +16,10 @@ class ColorNotifire with ChangeNotifier {
   final Color _lightGreen = const Color(0xFFA7B709);
   final Color _darkGreen = const Color(0xff9DAC09);
   final Color _darkBlueGray = const Color(0xff6C6D80);
+  final Color _darkGraychat = const Color(0xFF121212);
   final Color _transparentBlack = Colors.black54;
-  
+  final Color _chatBackground = const Color(0xFFEFEFEF);
+
   ColorNotifire() {
     _loadTheme();
   }
@@ -48,7 +50,10 @@ class ColorNotifire with ChangeNotifier {
   get category => isDark ? _accentGreen : _black;
   get containerColor => isDark ? _darkGray : _lightGray;
   get textFieldBackground => isDark ? _darkGray : _white;
-  
+  get chatBackground => isDark ?  _darkGraychat : _chatBackground;
+  get chatBackgroundMessage => isDark ? _chatBackground : _darkGraychat;
+
+
   get shadowColor => const Color(0xFF000000).withAlpha(26);
   
   get hintTextColor => isDark ? _mediumGray : _transparentBlack;
