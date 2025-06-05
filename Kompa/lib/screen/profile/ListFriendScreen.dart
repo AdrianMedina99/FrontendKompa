@@ -78,12 +78,12 @@ class _List_friendState extends State<List_friend> {
       for (String userId in userIds) {
         try {
           Map<String, dynamic> userData = await apiService.getClientUser(userId);
-          userData['userType'] = 'client';
+          userData['userType'] = 'CLIENT';
           users.add(userData);
         } catch (e) {
           try {
             Map<String, dynamic> userData = await apiService.getBusinessUser(userId);
-            userData['userType'] = 'business';
+            userData['userType'] = 'BUSINESS';
             users.add(userData);
           } catch (e2) {
             print('No se pudo cargar el usuario $userId: $e2');
@@ -157,11 +157,20 @@ class _List_friendState extends State<List_friend> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final apiService = Provider.of<HomeProvider>(context, listen: false).apiService;
     final currentUserId = authProvider.userId!;
-    final currentUserType = authProvider.userType ?? 'client';
-    final currentCollection = currentUserType.toLowerCase() == 'client' ? 'clientUsers' : 'businessUsers';
-    final targetCollection = user['userType'] == 'client' ? 'clientUsers' : 'businessUsers';
+    final currentUserType = authProvider.userType?.toUpperCase() ?? 'CLIENT';
+    final currentCollection = currentUserType == 'CLIENT' ? 'clientUsers' : 'businessUsers';
+    final targetUserType = (user['userType']?.toUpperCase() ?? 'CLIENT');
+    final targetCollection = targetUserType == 'CLIENT' ? 'clientUsers' : 'businessUsers';
     final targetUserId = user['id'];
     final isProcessing = _isProcessing[targetUserId] ?? false;
+
+    if (currentUserId == targetUserId) {
+      return ElevatedButton(
+        onPressed: null,
+        child: const Text('Tú mismo'),
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+      );
+    }
 
     if (widget.mode == FriendListMode.following) {
       return ElevatedButton(
@@ -170,8 +179,7 @@ class _List_friendState extends State<List_friend> {
             : () async {
                 setState(() => _isProcessing[targetUserId] = true);
                 try {
-                  await apiService.unfollowUser(currentUserId, targetUserId, currentCollection, targetCollection);
-                  await _loadFriendsList();
+                  await apiService.unfollowUser(currentUserId, targetUserId, currentCollection, targetCollection);                  await _loadFriendsList();
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Error al dejar de seguir: $e')),
@@ -196,8 +204,7 @@ class _List_friendState extends State<List_friend> {
                   : () async {
                       setState(() => _isProcessing[targetUserId] = true);
                       try {
-                        await apiService.unfollowUser(currentUserId, targetUserId, currentCollection, targetCollection);
-                        await _loadFriendsList();
+                        await apiService.unfollowUser(currentUserId, targetUserId, currentCollection, targetCollection);                        await _loadFriendsList();
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Error al dejar de seguir: $e')),
@@ -217,8 +224,7 @@ class _List_friendState extends State<List_friend> {
                   : () async {
                       setState(() => _isProcessing[targetUserId] = true);
                       try {
-                        await apiService.followUser(currentUserId, targetUserId, currentCollection, targetCollection);
-                        await _loadFriendsList();
+                        await apiService.followUser(currentUserId, targetUserId, currentCollection, targetCollection);                        await _loadFriendsList();
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Error al seguir: $e')),
@@ -282,3 +288,4 @@ class _List_friendState extends State<List_friend> {
     );
   }
 }
+

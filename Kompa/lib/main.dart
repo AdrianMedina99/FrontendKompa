@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kompa/providers/CategoryProvider.dart';
 import 'package:kompa/providers/HiloProvider.dart';
 import 'package:kompa/providers/HomeProvider.dart';
+import 'package:kompa/providers/LaQuedadaProvider.dart';
 import 'package:kompa/providers/RatingProvider.dart';
 import 'package:kompa/screen/onboarding_screen/SplashScreen.dart';
 import 'package:kompa/screen/common/BottomScreen.dart';
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const apiBaseUrl = 'https://b775-2a0c-5a80-2600-6a00-3059-4de4-6827-23.ngrok-free.app';
+    const apiBaseUrl = 'https://a16b-2a0c-5a80-2600-6a00-d143-c2f2-53f1-b830.ngrok-free.app';
     final apiService = ApiService(baseUrl: apiBaseUrl);
 
     return MultiProvider(
@@ -52,6 +53,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => RatingProvider(apiService),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => LaQuedadaProvider(apiService: apiService),
         ),
       ],
       builder: (context, child) {

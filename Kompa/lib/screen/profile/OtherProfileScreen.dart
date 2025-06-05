@@ -7,7 +7,9 @@ import '../../widget/ExpandableInfoCard.dart';
 import '../../config/AppConstants.dart';
 import '../../config/dark_mode.dart';
 import '../common/BottomScreen.dart';
+import 'ListFriendScreen.dart';
 import 'ReviewsScreen.dart';
+import '../laQuedada/LaQuedadaList.dart';
 
 class OtherProfileScreen extends StatefulWidget {
   //=========
@@ -353,56 +355,82 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Column(
-                          children: [
-                            _loadingFollowCounts
-                                ? SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                                : Text(
-                              _followersCount.toString(),
-                              style: TextStyle(
-                                color: notifier.textColor,
-                                fontFamily: "Ariom-Bold",
-                                fontSize: 18,
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => List_friend(
+                                  userId: widget.userId,
+                                  mode: FriendListMode.followers,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "Seguidores",
-                              style: TextStyle(
-                                color: notifier.textColor,
-                                fontSize: 14,
+                            );
+                          },
+                          child: Column(
+                            children: [
+                              _loadingFollowCounts
+                                  ? SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                                  : Text(
+                                _followersCount.toString(),
+                                style: TextStyle(
+                                  color: notifier.textColor,
+                                  fontFamily: "Ariom-Bold",
+                                  fontSize: 18,
+                                ),
                               ),
-                            ),
-                          ],
+                              Text(
+                                "Seguidores",
+                                style: TextStyle(
+                                  color: notifier.textColor,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         SizedBox(width: 40),
-                        Column(
-                          children: [
-                            _loadingFollowCounts
-                                ? SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                                : Text(
-                              _followingCount.toString(),
-                              style: TextStyle(
-                                color: notifier.textColor,
-                                fontFamily: "Ariom-Bold",
-                                fontSize: 18,
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => List_friend(
+                                  userId: widget.userId,
+                                  mode: FriendListMode.following,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "Siguiendo",
-                              style: TextStyle(
-                                color: notifier.textColor,
-                                fontSize: 14,
+                            );
+                          },
+                          child: Column(
+                            children: [
+                              _loadingFollowCounts
+                                  ? SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                                  : Text(
+                                _followingCount.toString(),
+                                style: TextStyle(
+                                  color: notifier.textColor,
+                                  fontFamily: "Ariom-Bold",
+                                  fontSize: 18,
+                                ),
                               ),
-                            ),
-                          ],
+                              Text(
+                                "Siguiendo",
+                                style: TextStyle(
+                                  color: notifier.textColor,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -412,62 +440,104 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                       builder: (context, snapshot) {
                         final isFollowing = snapshot.data ?? false;
                         final isLoading = !snapshot.hasData;
-                        return SizedBox(
-                          height: 54,
-                          width: width / 1.3,
-                          child: ElevatedButton(
-                            onPressed: isLoading ? null : () async {
-                              final apiService = Provider.of<HomeProvider>(context, listen: false).apiService;
-                              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                              final currentUserId = authProvider.userId!;
-                              final currentUserType = authProvider.userType ?? 'client';
-                              final currentCollection = currentUserType.toLowerCase() == 'client' ? 'clientUsers' : 'businessUsers';
-                              final targetUserId = userData?['id'] ?? widget.userId;
-                              final targetCollection = (userData?['role'] == 'CLIENT' || userData?['role'] == 'client')
-                                  ? 'clientUsers'
-                                  : 'businessUsers';
+                        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                        final isClientProfile = (userData?['role'] == "CLIENT" || userData?['userType'] == "client");
+                        final isClientViewer = (authProvider.userType == "CLIENT" || authProvider.userType == "client");
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (isClientProfile && isClientViewer)
+                              SizedBox(
+                                height: 54,
+                                width: width / 2.6,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => LaQuedadaList(
+                                          creadopor: userData?['id'] ?? widget.userId,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: notifier.buttonColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      "Quedadas",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (isClientProfile && isClientViewer) SizedBox(width: 10),
+                            SizedBox(
+                              height: 54,
+                              width: width / 2.6,
+                              child: ElevatedButton(
+                                onPressed: isLoading ? null : () async {
+                                  final apiService = Provider.of<HomeProvider>(context, listen: false).apiService;
+                                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                                  final currentUserId = authProvider.userId!;
+                                  final currentUserType = authProvider.userType ?? 'client';
+                                  final currentCollection = currentUserType.toLowerCase() == 'client' ? 'clientUsers' : 'businessUsers';
+                                  final targetUserId = userData?['id'] ?? widget.userId;
+                                  final targetCollection = (userData?['role'] == 'CLIENT' || userData?['role'] == 'client')
+                                      ? 'clientUsers'
+                                      : 'businessUsers';
 
-                              try {
-                                if (isFollowing) {
-                                  await apiService.unfollowUser(
-                                    currentUserId,
-                                    targetUserId,
-                                    currentCollection,
-                                    targetCollection,
-                                  );
-                                } else {
-                                  await apiService.followUser(
-                                    currentUserId,
-                                    targetUserId,
-                                    currentCollection,
-                                    targetCollection,
-                                  );
-                                }
-                                setState(() {});
-                                await _loadFollowCounts();
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error: $e')),
-                                );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isFollowing ? Colors.redAccent : notifier.buttonColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                                  try {
+                                    if (isFollowing) {
+                                      await apiService.unfollowUser(
+                                        currentUserId,
+                                        targetUserId,
+                                        currentCollection,
+                                        targetCollection,
+                                      );
+                                    } else {
+                                      await apiService.followUser(
+                                        currentUserId,
+                                        targetUserId,
+                                        currentCollection,
+                                        targetCollection,
+                                      );
+                                    }
+                                    setState(() {});
+                                    await _loadFollowCounts();
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error: $e')),
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: isFollowing ? Colors.redAccent : notifier.buttonColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                ),
+                                child: isLoading
+                                    ? const CircularProgressIndicator(color: Colors.white)
+                                    : Text(
+                                  isFollowing ? "Dejar de seguir" : "Seguir",
+                                  style: TextStyle(
+                                    color: isFollowing ? Colors.white : Colors.black,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
                             ),
-                            child: isLoading
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : Text(
-                              isFollowing ? "Dejar de seguir" : "Seguir",
-                              style: TextStyle(
-                                color: isFollowing ? Colors.white : Colors.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
+                          ],
                         );
                       }
                     ),
@@ -709,4 +779,6 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
     );
   }
 }
+
+
 

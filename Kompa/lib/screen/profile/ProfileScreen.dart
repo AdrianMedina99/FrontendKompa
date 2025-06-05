@@ -384,18 +384,6 @@ class _profileState extends State<profile> {
                       ],
                     ),
                     AppConstants.Height(height / 40),
-                    SizedBox(
-                      width: width / 1.3,
-                      child: ExpandableInfoCard(
-                        title: "Información Personal",
-                        backgroundColor: notifier.backGround,
-                        headerColor: notifier.buttonColor,
-                        textColor: notifier.svgColor,
-                        shadowColor: notifier.inv,
-                        children: userType == "CLIENT" ? _buildClientDetails() : _buildBusinessDetails(),
-                      ),
-                    ),
-                    AppConstants.Height(height / 40),
                     Container(
                       width: width / 1.3,
                       decoration: BoxDecoration(
@@ -621,73 +609,7 @@ class _profileState extends State<profile> {
       ),
     );
   }
-
-  ///Metodo para construir los detalles del cliente
-  List<Widget> _buildClientDetails() {
-    return [
-      _buildDetailItem("Teléfono", userData?['phone']?.toString() ?? "No disponible"),
-      _buildDetailItem("Género", userData?['gender'] ?? "No especificado"),
-      _buildDetailItem("DNI", userData?['dni'] ?? "No disponible"),
-      _buildDetailItem("Fecha de nacimiento", _formatBirthDate() ?? "No disponible"),
-      _buildDetailItem("Descripción", userData?['description'] ?? "Sin descripción"),
-    ];
-  }
-
-  ///Metodo para construir los detalles del negocio
-  List<Widget> _buildBusinessDetails() {
-    return [
-      _buildDetailItem("Teléfono", userData?['phone']?.toString() ?? "No disponible"),
-      _buildDetailItem("Sitio web", userData?['website'] ?? "No disponible"),
-      _buildDetailItem("Descripción", userData?['description'] ?? "Sin descripción"),
-    ];
-  }
-
-  ///Metodo para construir un item de detalle
-  Widget _buildDetailItem(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: notifier.subtitleTextColor,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              color: notifier.textColor,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Divider(color: notifier.inv.withOpacity(0.1)),
-        ],
-      ),
-    );
-  }
-
-  ///Metodo para formatear la fecha de nacimiento
-  String? _formatBirthDate() {
-    if (userData?['birthDate'] == null) return null;
-    try {
-      if (userData!['birthDate'] is Map && userData!['birthDate'].containsKey('seconds')) {
-        final seconds = userData!['birthDate']['seconds'] as int;
-        final date = DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
-        return "${date.day}/${date.month}/${date.year}";
-      } else if (userData!['birthDate'] is String) {
-        final date = DateTime.parse(userData!['birthDate']);
-        return "${date.day}/${date.month}/${date.year}";
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
+  
 
   ///Metodo para obtener la abreviatura del mes
   String _getMonthAbbreviation(int month) {

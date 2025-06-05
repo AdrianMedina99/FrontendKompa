@@ -13,6 +13,7 @@ import 'AllScreen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:kompa/screen/common/SearchScreen.dart';
+import '../laQuedada/setting.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -201,130 +202,133 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           AppConstants.Width(width / 50),
         ],
       ),
-      body: FutureBuilder(
-        future: _fetchFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: notifier.buttonColor,
-              ),
-            );
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                "Error al cargar categorías",
-                style: TextStyle(color: notifier.textColor),
-              ),
-            );
-          }
-
-          final categories = categoryProvider.categories;
-
-          return DefaultTabController(
-            length: categories.length + 1,
-            child: Column(
-              children: [
-                AppConstants.Height(height / 40),
-                TabBar(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  physics: const BouncingScrollPhysics(),
-                  labelColor: const Color(0xff131313),
-                  labelStyle: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: "Manrope_bold",
-                    letterSpacing: 0.2,
+      body: Stack(
+        children: [
+          FutureBuilder(
+            future: _fetchFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: notifier.buttonColor,
                   ),
-                  isScrollable: true,
-                  indicatorSize: TabBarIndicatorSize.label,
-                  unselectedLabelColor: const Color(0xff6C6D80),
-                  indicator: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: const Color(0xffD1E50C),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    "Error al cargar categorías",
+                    style: TextStyle(color: notifier.textColor),
                   ),
-                  tabs: [
-                    Container(
-                      alignment: Alignment.center,
-                      height: 40,
-                      width: 80,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(40),
+                );
+              }
+
+              final categories = categoryProvider.categories;
+
+              return DefaultTabController(
+                length: categories.length + 1,
+                child: Column(
+                  children: [
+                    AppConstants.Height(height / 40),
+                    TabBar(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      physics: const BouncingScrollPhysics(),
+                      labelColor: const Color(0xff131313),
+                      labelStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Manrope_bold",
+                        letterSpacing: 0.2,
                       ),
-                      child: const Tab(
-                        child: Text(
-                          "All",
-                          style: TextStyle(
-                            fontFamily: "Ariom-Regular",
-                            fontSize: 16,
+                      isScrollable: true,
+                      indicatorSize: TabBarIndicatorSize.label,
+                      unselectedLabelColor: const Color(0xff6C6D80),
+                      indicator: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: const Color(0xffD1E50C),
+                      ),
+                      tabs: [
+                        Container(
+                          alignment: Alignment.center,
+                          height: 40,
+                          width: 80,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(40),
                           ),
-                        ),
-                      ),
-                    ),
-                    ...categories.map((category) {
-                      return Container(
-                        alignment: Alignment.center,
-                        height: 40,
-                        width: 120,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Tab(
-                          child: Text(
-                            category['title'],
-                            style: const TextStyle(
-                              fontFamily: "Ariom-Regular",
-                              fontSize: 16,
+                          child: const Tab(
+                            child: Text(
+                              "All",
+                              style: TextStyle(
+                                fontFamily: "Ariom-Regular",
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                         ),
-                      );
-                    }).toList(),
+                        ...categories.map((category) {
+                          return Container(
+                            alignment: Alignment.center,
+                            height: 40,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Tab(
+                              child: Text(
+                                category['title'],
+                                style: const TextStyle(
+                                  fontFamily: "Ariom-Regular",
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          const All(),
+                          ...categories.map((category) {
+                            return Consumer<HomeProvider>(
+                              builder: (context, homeProvider, child) {
+                                if (homeProvider.isLoading) {
+                                  return ListView.builder(
+                                    padding: const EdgeInsets.all(16),
+                                    itemCount: 5,
+                                    itemBuilder: (_, index) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(bottom: 16.0),
+                                        child: Container(
+                                          height: 100,
+                                          decoration: BoxDecoration(
+                                            color: notifier.backGround.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(16),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }
+                                return HomeCategoriesView(
+                                  categoryId: category['id'],
+                                  categoryTitle: category['title'],
+                                );
+                              },
+                            );
+                          }).toList(),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      const All(),
-                      ...categories.map((category) {
-                        return Consumer<HomeProvider>(
-                          builder: (context, homeProvider, child) {
-                            if (homeProvider.isLoading) {
-                              return ListView.builder(
-                                padding: const EdgeInsets.all(16),
-                                itemCount: 5,
-                                itemBuilder: (_, index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 16.0),
-                                    child: Container(
-                                      height: 100,
-                                      decoration: BoxDecoration(
-                                        color: notifier.backGround.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }
-                            return HomeCategoriesView(
-                              categoryId: category['id'],
-                              categoryTitle: category['title'],
-                            );
-                          },
-                        );
-                      }).toList(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 }
-
