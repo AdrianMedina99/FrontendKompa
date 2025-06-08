@@ -130,7 +130,6 @@ class _ChatLaQuedadaState extends State<ChatLaQuedada> {
       });
       _controller.clear();
     } catch (_) {
-      // Error opcionalmente manejado
     }
 
     if (mounted) setState(() => _sending = false);
@@ -159,12 +158,17 @@ class _ChatLaQuedadaState extends State<ChatLaQuedada> {
               ),
             ),
             const SizedBox(width: 10),
-            Text(
-              widget.name,
-              style: TextStyle(
-                fontSize: 20,
-                color: notifier.textColor,
-                fontFamily: "Ariom-Bold",
+            // Permitir dos líneas para el nombre largo
+            Expanded(
+              child: Text(
+                widget.name,
+                style: TextStyle(
+                  fontSize: 20,
+                  color: notifier.textColor,
+                  fontFamily: "Ariom-Bold",
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -173,12 +177,6 @@ class _ChatLaQuedadaState extends State<ChatLaQuedada> {
           IconButton(
             icon: Icon(Icons.settings, color: notifier.buttonColor),
             onPressed: () {
-              final auth = Provider.of<AuthProvider>(context, listen: false);
-              if (auth.userId != widget.creadoPor) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('No eres el admin de este grupo')),
-                );
-              } else {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => LaQuedadaSettings(
@@ -186,7 +184,6 @@ class _ChatLaQuedadaState extends State<ChatLaQuedada> {
                     quedadaId: widget.quedadaId,
                   )),
                 );
-              }
             },
           ),
         ],

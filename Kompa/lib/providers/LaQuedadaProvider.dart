@@ -205,5 +205,6 @@ class LaQuedadaProvider extends ChangeNotifier {
       // Manejo de error opcional
     }
   }
+
 }
 

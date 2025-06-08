@@ -970,5 +970,39 @@ class ApiService {
     }
   }
 
+  // Servicio para resetear quedadas pasadas
+  Future<void> resetQuedadasPasadas() async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/quedadas/reset'),
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error al resetear quedadas pasadas: ${response.body}');
+    }
+  }
+
+  Future<void> actualizarHoraYLugar(String quedadaId, DateTime? horaEncuentro, double? latitud, double? longitud) async {
+    final timestamp = horaEncuentro?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch;
+
+    final queryParams = {
+      'horaEncuentro': timestamp.toString(),
+      'latitud': (latitud ?? 0.0).toString(),
+      'longitud': (longitud ?? 0.0).toString(),
+    };
+
+    final uri = Uri.parse('$baseUrl/api/quedadas/$quedadaId/actualizar-hora-lugar')
+        .replace(queryParameters: queryParams);
+
+    final response = await http.put(
+      uri,
+      headers: _getHeaders(),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error al actualizar hora y lugar: ${response.body}');
+    }
+  }
+
 }
 
