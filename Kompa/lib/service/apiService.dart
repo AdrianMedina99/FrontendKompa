@@ -1004,5 +1004,20 @@ class ApiService {
     }
   }
 
+  // REPORTES
+
+  Future<String> createReport(Map<String, dynamic> reportData) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/reports'),
+      headers: _getHeaders(),
+      body: jsonEncode(reportData),
+    );
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Error al crear el reporte: ${response.body}');
+    }
+  }
+
 }
 

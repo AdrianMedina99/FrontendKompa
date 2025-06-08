@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../config/AppConstants.dart';
 import '../../config/dark_mode.dart';
+import '../../providers/AuthProvider.dart';
 import '../../providers/HomeProvider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -96,6 +97,129 @@ class _Event_detailState extends State<Event_detail> {
     }
   }
 
+  Future<void> _showReportDialog(BuildContext context) async {
+    final authProvider = Provider.of<HomeProvider>(context, listen: false);
+    final userProvider = Provider.of<AuthProvider>(context, listen: false);
+    final apiService = authProvider.apiService;
+    final loggedUserId = userProvider.userId;
+    final reportedId = eventData?['id'];
+    final descController = TextEditingController();
+    bool isSubmitting = false;
+    final notifier = Provider.of<ColorNotifire>(context, listen: false);
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              backgroundColor: notifier.backGround,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              title: Text(
+                'Reportar evento',
+                style: TextStyle(
+                  color: notifier.textColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+              content: SizedBox(
+                width: 340,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: 'EVENT',
+                      items: [
+                        DropdownMenuItem(value: 'EVENT', child: Text('Evento')),
+                      ],
+                      onChanged: null,
+                      decoration: InputDecoration(
+                        labelText: 'Tipo',
+                        labelStyle: TextStyle(color: notifier.textColor),
+                        filled: true,
+                        fillColor: notifier.textFieldBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      style: TextStyle(color: notifier.textColor),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: descController,
+                      decoration: InputDecoration(
+                        labelText: 'Descripción',
+                        labelStyle: TextStyle(color: notifier.textColor),
+                        filled: true,
+                        fillColor: notifier.textFieldBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      style: TextStyle(color: notifier.textColor),
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting ? null : () => Navigator.pop(context),
+                  child: Text('Cancelar', style: TextStyle(color: notifier.buttonColor)),
+                ),
+                ElevatedButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          if (descController.text.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('La descripción es obligatoria')),
+                            );
+                            return;
+                          }
+                          setStateDialog(() => isSubmitting = true);
+                          try {
+                            final now = DateTime.now();
+                            final timestamp = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(now);
+                            final reportData = {
+                              'description': descController.text.trim(),
+                              'type': 'EVENT',
+                              'idReported': reportedId,
+                              'idReporter': loggedUserId,
+                              'timestamp': timestamp,
+                              'status': 'PENDIENTE',
+                              'idAdmin': null,
+                              'respuesta': null,
+                            };
+                            await apiService.createReport(reportData);
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Reporte enviado correctamente')),
+                            );
+                          } catch (e) {
+                            setStateDialog(() => isSubmitting = false);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error al enviar reporte: $e')),
+                            );
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: notifier.buttonColor,
+                    foregroundColor: notifier.buttonTextColor,
+                  ),
+                  child: isSubmitting
+                      ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text('Reportar', style: TextStyle(color: notifier.buttonTextColor)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     notifier = Provider.of<ColorNotifire>(context, listen: true);
@@ -142,6 +266,14 @@ class _Event_detailState extends State<Event_detail> {
                   builder: (context) => Hilo(eventId: eventData!['id']),
                 ),
               );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.report, color: notifier.textColor, size: 30),
+            tooltip: 'Reportar',
+            iconSize: 30,
+            onPressed: () {
+              _showReportDialog(context);
             },
           ),
         ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../providers/AuthProvider.dart';
 import '../../providers/HomeProvider.dart';
 import '../../providers/RatingProvider.dart';
@@ -11,7 +12,6 @@ import 'ListFriendScreen.dart';
 import 'ReviewsScreen.dart';
 import '../laQuedada/LaQuedadaList.dart';
 import '../Home/EventDetailScreen.dart';
-
 
 class OtherProfileScreen extends StatefulWidget {
   //=========
@@ -270,6 +270,130 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
     }
   }
 
+  Future<void> _showReportDialog(BuildContext context) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final apiService = Provider.of<HomeProvider>(context, listen: false).apiService;
+    final loggedUserId = authProvider.userId;
+    final reportedId = widget.userId;
+    String? selectedType;
+    final descController = TextEditingController();
+    bool isSubmitting = false;
+    final notifier = Provider.of<ColorNotifire>(context, listen: false);
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              backgroundColor: notifier.backGround,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              title: Text(
+                'Reportar usuario',
+                style: TextStyle(
+                  color: notifier.textColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+              content: SizedBox(
+                width: 340,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: selectedType,
+                      items: [
+                        DropdownMenuItem(value: 'BUSINESS', child: Text('Negocio')),
+                        DropdownMenuItem(value: 'CLIENT', child: Text('Cliente')),
+                      ],
+                      onChanged: (v) => setStateDialog(() => selectedType = v),
+                      decoration: InputDecoration(
+                        labelText: 'Tipo',
+                        labelStyle: TextStyle(color: notifier.textColor),
+                        filled: true,
+                        fillColor: notifier.textFieldBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      style: TextStyle(color: notifier.textColor),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: descController,
+                      decoration: InputDecoration(
+                        labelText: 'Descripción',
+                        labelStyle: TextStyle(color: notifier.textColor),
+                        filled: true,
+                        fillColor: notifier.textFieldBackground,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      style: TextStyle(color: notifier.textColor),
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting ? null : () => Navigator.pop(context),
+                  child: Text('Cancelar', style: TextStyle(color: notifier.buttonColor)),
+                ),
+                ElevatedButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          if (selectedType == null || descController.text.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Todos los campos son obligatorios')),
+                            );
+                            return;
+                          }
+                          setStateDialog(() => isSubmitting = true);
+                          try {
+                            final now = DateTime.now();
+                            final timestamp = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(now);
+                            final reportData = {
+                              'description': descController.text.trim(),
+                              'type': selectedType,
+                              'idReported': reportedId,
+                              'idReporter': loggedUserId,
+                              'timestamp': timestamp,
+                              'status': 'PENDIENTE',
+                              'idAdmin': null,
+                              'respuesta': null,
+                            };
+                            await apiService.createReport(reportData);
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Reporte enviado correctamente')),
+                            );
+                          } catch (e) {
+                            setStateDialog(() => isSubmitting = false);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error al enviar reporte: $e')),
+                            );
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: notifier.buttonColor,
+                    foregroundColor: notifier.buttonTextColor,
+                  ),
+                  child: isSubmitting
+                      ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text('Reportar', style: TextStyle(color: notifier.buttonTextColor)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     notifier = Provider.of<ColorNotifire>(context, listen: true);
@@ -310,6 +434,14 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                 MaterialPageRoute(builder: (context) => const BottomBarScreen()),
                 (route) => false,
               );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.report, color: notifier.inv, size: 30),
+            tooltip: 'Reportar',
+            iconSize: 30,
+            onPressed: () {
+              _showReportDialog(context);
             },
           ),
         ],
@@ -786,3 +918,4 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
     );
   }
 }
+
