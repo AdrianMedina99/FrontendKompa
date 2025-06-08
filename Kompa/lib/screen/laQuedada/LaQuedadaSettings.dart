@@ -11,7 +11,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:geocoding/geocoding.dart';
 import '../common/BottomScreen.dart';
-
+import 'dart:async'; // Agregado para Timer
 
 class LaQuedadaSettings extends StatefulWidget {
   final String name;
@@ -39,6 +39,7 @@ class _LaQuedadaSettingsState extends State<LaQuedadaSettings> {
   TextEditingController _searchController = TextEditingController();
   String? _ubicacionError;
   String? _ubicacionNombre;
+  Timer? _resetTimer;
 
   @override
   void initState() {
@@ -48,7 +49,9 @@ class _LaQuedadaSettingsState extends State<LaQuedadaSettings> {
       await provider.fetchQuedada(widget.quedadaId);
       provider.fetchSolicitudesPendientes(widget.quedadaId);
       provider.fetchMiembrosAceptados(widget.quedadaId);
-
+      _resetTimer = Timer.periodic(Duration(minutes: 10), (_) {
+        _checkAndResetQuedada();
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final provider = Provider.of<LaQuedadaProvider>(context, listen: false);
         final quedada = provider.quedada;
@@ -73,8 +76,24 @@ class _LaQuedadaSettingsState extends State<LaQuedadaSettings> {
     });
   }
 
+  Future<void> _checkAndResetQuedada() async {
+    if (_horaEncuentro != null && DateTime.now().isAfter(_horaEncuentro!.add(Duration(hours: 2)))) {
+      try {
+        await Provider.of<LaQuedadaProvider>(context, listen: false)
+            .apiService
+            .resetQuedada(widget.quedadaId);
+        await Provider.of<LaQuedadaProvider>(context, listen: false)
+            .fetchQuedada(widget.quedadaId);
+      } catch (e) {
+        // Manejo de error opcional
+        print("Error en reset automático: $e");
+      }
+    }
+  }
+
   @override
   void dispose() {
+    _resetTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -695,8 +714,3 @@ class _LaQuedadaSettingsState extends State<LaQuedadaSettings> {
     );
   }
 }
-
-
-
-
-

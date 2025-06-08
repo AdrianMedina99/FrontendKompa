@@ -970,15 +970,14 @@ class ApiService {
     }
   }
 
-  // Servicio para resetear quedadas pasadas
-  Future<void> resetQuedadasPasadas() async {
+  // Servicio para resetear una quedada específica si ya pasó
+  Future<void> resetQuedada(String quedadaId) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/api/quedadas/reset'),
+      Uri.parse('$baseUrl/api/quedadas/$quedadaId/reset'),
       headers: _getHeaders(),
     );
-
     if (response.statusCode != 200) {
-      throw Exception('Error al resetear quedadas pasadas: ${response.body}');
+      throw Exception('Error al resetear la quedada');
     }
   }
 
@@ -1005,7 +1004,7 @@ class ApiService {
   }
 
   // REPORTES
-
+  
   Future<String> createReport(Map<String, dynamic> reportData) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/reports'),
@@ -1021,3 +1020,4 @@ class ApiService {
 
 }
 
+}
