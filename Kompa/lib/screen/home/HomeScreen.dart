@@ -13,7 +13,6 @@ import 'AllScreen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:kompa/screen/common/SearchScreen.dart';
-import '../laQuedada/LaQuedadaSettings.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

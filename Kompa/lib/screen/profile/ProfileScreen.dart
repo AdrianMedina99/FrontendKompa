@@ -7,7 +7,6 @@ import '../../providers/HomeProvider.dart';
 import '../../providers/RatingProvider.dart';
 import '../Home/EventDetailScreen.dart';
 import './SettingScreen.dart';
-import '../Profile/share_profile.dart';
 import '../../config/dark_mode.dart';
 import 'EditProfileScreen.dart';
 import 'package:geocoding/geocoding.dart';
@@ -186,22 +185,6 @@ class _profileState extends State<profile> {
           ),
         ),
         actions: [
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const Share_profile(),
-                ),
-              );
-            },
-            child: Image.asset(
-              "assets/Share.png",
-              height: 30,
-              width: 30,
-              color: notifier.textColor,
-            ),
-          ),
           AppConstants.Width(width / 30),
           InkWell(
             onTap: () {

@@ -9,6 +9,7 @@ import '../../providers/AuthProvider.dart';
 import 'EditProfileScreen.dart';
 import 'PrivacyPolicy.dart';
 import '../sign_in/LoginScreen.dart';
+import 'ReportDetails.dart';
 
 class Setting extends StatefulWidget {
   const Setting({super.key});
@@ -82,6 +83,22 @@ class _SettingState extends State<Setting> {
             child: accountDetails(
               image: "assets/Profile Bottom.png",
               name: "Editar Perfil",
+              icon: "assets/arrow-right.png",
+              onPress: () {},
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ReportDetailsScreen(),
+                ),
+              );
+            },
+            child: accountDetails(
+              image: "assets/Lock.png",
+              name: "Revisión de reportes",
               icon: "assets/arrow-right.png",
               onPress: () {},
             ),

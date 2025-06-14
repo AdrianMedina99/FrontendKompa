@@ -216,6 +216,12 @@ class _LaQuedadaListState extends State<LaQuedadaList> {
                                         status = snapshot.data!;
                                       }
                                       bool isEnabled = status == "Solicitar unirse";
+                                      Color textColor;
+                                      if (notifier.isDark && (status == "Miembro" || status == "Pendiente")) {
+                                        textColor = Colors.white;
+                                      } else {
+                                        textColor = notifier.buttonTextColor;
+                                      }
                                       return ElevatedButton(
                                         onPressed: isEnabled
                                             ? () async {
@@ -242,7 +248,7 @@ class _LaQuedadaListState extends State<LaQuedadaList> {
                                         child: Text(
                                           status,
                                           style: TextStyle(
-                                            color: notifier.buttonTextColor,
+                                            color: textColor,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16,
                                           ),
@@ -274,3 +280,4 @@ class _LaQuedadaListState extends State<LaQuedadaList> {
     return "Sin hora";
   }
 }
+

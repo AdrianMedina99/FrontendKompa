@@ -79,8 +79,30 @@ class AuthProvider with ChangeNotifier {
 
       _apiService.setToken(_token);
 
+
       if (_userId != null && _userType != null) {
-        await _loadUserData();
+        Map<String, dynamic> userData;
+        if (_userType == 'CLIENT') {
+          userData = await _apiService.getClientUser(_userId!);
+        } else if (_userType == 'BUSINESS') {
+          userData = await _apiService.getBusinessUser(_userId!);
+        } else {
+          userData = {};
+        }
+
+        print("Datos del usuario tras login: $userData");
+        if (userData['banned'] == true) {
+          _errorMessage = 'Usuario baneado';
+          _isAuthenticated = false;
+          return false;
+        }
+
+        if (userData['banned'] == true) {
+          _errorMessage = 'Usuario baneado';
+          _isAuthenticated = false;
+          return false;
+        }
+        _userData = userData;
       }
 
       await _saveAuthData();
@@ -226,18 +248,13 @@ class AuthProvider with ChangeNotifier {
         addressData: addressData,
       );
 
-      if (response.containsKey('success') && response['success'] == true) {
-        return await login(email: email, password: password);
-      } else if (response.containsKey('laQuedada') &&
-          response['laQuedada'].toString().toLowerCase().contains('registrado correctamente')) {
+      if ((response.containsKey('success') && response['success'] == true) ||
+          (response.containsKey('message') && response['message'].toString().toLowerCase().contains('registrado correctamente'))) {
         return await login(email: email, password: password);
       } else {
-        _errorMessage = 'Error en el registro: ${response['laQuedada'] ?? 'Desconocido'}';
+        _errorMessage = 'Error en el registro: ${response['message'] ?? response['laQuedada'] ?? 'Desconocido'}';
         return false;
       }
-    } catch (e) {
-      _errorMessage = 'Error al registrar cliente: $e';
-      return false;
     } finally {
       _setLoading(false);
     }

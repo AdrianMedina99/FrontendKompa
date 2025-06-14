@@ -38,17 +38,11 @@ class AboutUs extends StatelessWidget {
                   notifire),
               const SizedBox(height: 20),
               _sectionTitle("¿Qué nos hace diferentes?", notifire),
+              const SizedBox(height: 5),
               _sectionBulletList([
                 'Función “La Quedada”: Únete a grupos antes del evento para socializar desde el inicio.',
                 'Reputación y gamificación: Fomenta la participación con valoraciones y rankings.',
               ], notifire),
-              const SizedBox(height: 20),
-              _sectionTitle("Tecnologías utilizadas", notifire),
-              _sectionText(
-                  "Kompa está desarrollada con Flutter para móviles Android e iOS, y cuenta con un backend en Spring Boot. "
-                      "Utilizamos Firebase para autenticación, base de datos en tiempo real y almacenamiento seguro. "
-                      "También integramos Render para el despliegue y PayPal para los pagos dentro de la app.",
-                  notifire),
               const SizedBox(height: 20),
               _sectionTitle("Nuestro objetivo", notifire),
               _sectionText(

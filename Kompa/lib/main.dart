@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const apiBaseUrl = 'https://77a5-2a0c-5a80-2600-6a00-4807-ce4b-c1c5-ac61.ngrok-free.app';
+    const apiBaseUrl = 'https://apirestfullkompa.up.railway.app';
     final apiService = ApiService(baseUrl: apiBaseUrl);
 
     return MultiProvider(

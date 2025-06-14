@@ -1018,6 +1018,17 @@ class ApiService {
     }
   }
 
-}
+  // Obtener reportes por idReporter (solo REVISADO)
+  Future<List<dynamic>> getReportsByIdReporter(String idReporter) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/reports/reporter/$idReporter'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener reportes del reportero: ${response.body}');
+    }
+  }
 
 }

@@ -301,23 +301,28 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    DropdownButtonFormField<String>(
-                      value: selectedType,
-                      items: [
-                        DropdownMenuItem(value: 'BUSINESS', child: Text('Negocio')),
-                        DropdownMenuItem(value: 'CLIENT', child: Text('Cliente')),
-                      ],
-                      onChanged: (v) => setStateDialog(() => selectedType = v),
-                      decoration: InputDecoration(
-                        labelText: 'Tipo',
-                        labelStyle: TextStyle(color: notifier.textColor),
-                        filled: true,
-                        fillColor: notifier.textFieldBackground,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                    Theme(
+                      data: Theme.of(context).copyWith(
+                        canvasColor: notifier.textFieldBackground,
                       ),
-                      style: TextStyle(color: notifier.textColor),
+                      child: DropdownButtonFormField<String>(
+                        value: selectedType,
+                        items: [
+                          DropdownMenuItem(value: 'BUSINESS', child: Text('Negocio')),
+                          DropdownMenuItem(value: 'CLIENT', child: Text('Cliente')),
+                        ],
+                        onChanged: (v) => setStateDialog(() => selectedType = v),
+                        decoration: InputDecoration(
+                          labelText: 'Tipo',
+                          labelStyle: TextStyle(color: notifier.textColor),
+                          filled: true,
+                          fillColor: notifier.textFieldBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        style: TextStyle(color: notifier.textColor),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
