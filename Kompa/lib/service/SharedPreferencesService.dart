@@ -1,10 +1,7 @@
-// lib/services/shared_preferences_service.dart
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Versión mejorada de SharedPreferencesService
 class SharedPreferencesService {
-  // Métodos genéricos para cualquier tipo de dato
   static Future<void> saveString(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, value);
@@ -25,7 +22,6 @@ class SharedPreferencesService {
     return prefs.getBool(key);
   }
 
-  // Métodos específicos para objetos complejos
   static Future<void> saveMap(String key, Map<String, dynamic> value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, jsonEncode(value));

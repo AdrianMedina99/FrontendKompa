@@ -74,7 +74,7 @@ class Win32Window {
  private:
   friend class WindowClassRegistrar;
 
-  // OS callback called by message pump. Handles the WM_NCCREATE message which
+  // OS callback called by laQuedada pump. Handles the WM_NCCREATE laQuedada which
   // is passed when the non-client area is being created and enables automatic
   // non-client DPI scaling so that the non-client area automatically
   // responds to changes in DPI. All other messages are handled by
