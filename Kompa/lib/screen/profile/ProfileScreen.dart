@@ -1,4 +1,3 @@
-// ignore_for_file: file_names, camel_case_types
 import 'package:kompa/config/AppConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

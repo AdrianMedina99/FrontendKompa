@@ -1,4 +1,3 @@
-// ignore_for_file: file_names, camel_case_types
 
 import 'package:kompa/config/AppConstants.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +10,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:geocoding/geocoding.dart';
 import '../common/BottomScreen.dart';
-import 'dart:async'; // Agregado para Timer
+import 'dart:async';
 
 class LaQuedadaSettings extends StatefulWidget {
   final String name;
@@ -85,7 +84,6 @@ class _LaQuedadaSettingsState extends State<LaQuedadaSettings> {
         await Provider.of<LaQuedadaProvider>(context, listen: false)
             .fetchQuedada(widget.quedadaId);
       } catch (e) {
-        // Manejo de error opcional
         print("Error en reset automático: $e");
       }
     }
@@ -158,7 +156,7 @@ class _LaQuedadaSettingsState extends State<LaQuedadaSettings> {
               position: LatLng(loc.latitude, loc.longitude),
             ),
           };
-          _ubicacionError = null; // Limpiar error aquí
+          _ubicacionError = null;
         });
         _mapController?.animateCamera(
           CameraUpdate.newLatLngZoom(LatLng(loc.latitude, loc.longitude), 15),
@@ -196,7 +194,7 @@ class _LaQuedadaSettingsState extends State<LaQuedadaSettings> {
             if (placemarks.first.thoroughfare?.isNotEmpty ?? false) {
               _ubicacionNombre = '${placemarks.first.thoroughfare}, $_ubicacionNombre';
             }
-            _ubicacionError = null; // Limpiar error si se obtiene nombre
+            _ubicacionError = null;
           });
         } else {
           setState(() {
@@ -304,8 +302,6 @@ class _LaQuedadaSettingsState extends State<LaQuedadaSettings> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final quedada = quedadaProvider.quedada;
     final isCreador = authProvider.userId == quedada?['creadoPor'];
-
-    // Usar _parseHoraEncuentro y valores directos para mostrar
     final hora = _parseHoraEncuentro(quedada?['horaEncuentro']);
     final latitud = quedada?['latitud'];
     final longitud = quedada?['longitud'];

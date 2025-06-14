@@ -73,7 +73,6 @@ class _ExpandableInfoCardState extends State<ExpandableInfoCard> with SingleTick
       ),
       child: Column(
         children: [
-          // Encabezado con color buttonColor
           Material(
             color: headerColor,
             shape: RoundedRectangleBorder(
@@ -115,7 +114,6 @@ class _ExpandableInfoCardState extends State<ExpandableInfoCard> with SingleTick
               ),
             ),
           ),
-          // Contenido con backgroundColor
           ClipRRect(
             borderRadius: BorderRadius.vertical(bottom: const Radius.circular(15)),
             child: AnimatedCrossFade(

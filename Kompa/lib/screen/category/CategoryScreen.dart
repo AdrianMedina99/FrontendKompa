@@ -70,14 +70,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
           ],
         ),
         actions: [
-          InkWell(
-            onTap: () {},
-            child: Image.asset(
-              "assets/notification.png",
-              scale: 3,
-              color: notifier.textColor,
-            ),
-          ),
           AppConstants.Width(width / 50),
           InkWell(
             onTap: () {

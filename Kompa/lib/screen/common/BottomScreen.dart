@@ -1,4 +1,3 @@
-// ignore_for_file: file_names
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -28,7 +27,6 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
     final isBusiness = (authProvider.userType == "BUSINESS" || authProvider.userType == "business");
     final userId = Provider.of<AuthProvider>(context, listen: false).userId;
 
-    // Definir las pantallas y los items según el tipo de usuario
     final List<Widget> myChildren = isBusiness
         ? [
             const Home(),
@@ -195,7 +193,6 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
             ),
           ];
 
-    // Ajustar el currentIndex si es necesario
     int effectiveIndex = currentIndex;
     if (isBusiness && currentIndex > 2) {
       effectiveIndex = 0;

@@ -120,7 +120,6 @@ class _OtherProfileScreenState extends State<OtherProfileScreen> {
 
     try {
       final apiService = Provider.of<HomeProvider>(context, listen: false).apiService;
-      // Determinar tipo de usuario visitado
       String collection = 'clientUsers';
       if (userData != null && (userData!['role'] == 'BUSINESS' || userData!['userType'] == 'business')) {
         collection = 'businessUsers';

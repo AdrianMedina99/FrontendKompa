@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'package:kompa/config/AppConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:kompa/screen/laQuedada/LaQuedadaSettings.dart';
@@ -53,7 +51,7 @@ class _ChatLaQuedadaState extends State<ChatLaQuedada> {
   }
 
   void _startListeningToMessages() {
-    _fetchMessages(); // Carga inicial
+    _fetchMessages(); 
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
       _fetchMessages();
     });
@@ -72,8 +70,8 @@ class _ChatLaQuedadaState extends State<ChatLaQuedada> {
         });
         _preloadUserNames(newMessages);
       }
-    } catch (_) {
-      // Error opcionalmente manejado
+    } catch (e) {
+      print('Error al obtener mensajes: $e');
     }
   }
 
@@ -158,7 +156,6 @@ class _ChatLaQuedadaState extends State<ChatLaQuedada> {
               ),
             ),
             const SizedBox(width: 10),
-            // Permitir dos líneas para el nombre largo
             Expanded(
               child: Text(
                 widget.name,

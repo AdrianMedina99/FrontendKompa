@@ -1,4 +1,3 @@
-// ignore_for_file: file_names
 
 import 'package:kompa/config/AppConstants.dart';
 import 'package:flutter/material.dart';
@@ -167,7 +166,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           ],
         ),
         actions: [
-          InkWell(
+          //Si me da tiempo hago la logica de notificaciones
+          /*InkWell(
             onTap: () {
               Navigator.push(
                 context,
@@ -181,7 +181,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               scale: 3,
               color: notifier.textColor,
             ),
-          ),
+          ),*/
           AppConstants.Width(width / 50),
           InkWell(
             onTap: () {

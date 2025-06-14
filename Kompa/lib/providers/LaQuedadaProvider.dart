@@ -8,17 +8,17 @@ class LaQuedadaProvider extends ChangeNotifier {
   bool loading = false;
   String? error;
 
-  // Solicitudes de quedada
+  /// Solicitudes de quedada
   List<Map<String, dynamic>> solicitudesPendientes = [];
   bool loadingSolicitudes = false;
   String? errorSolicitudes;
 
-  // Mensajes de chat de quedada
+  /// Mensajes de chat de quedada
   List<Map<String, dynamic>> mensajes = [];
   bool loadingMensajes = false;
   String? errorMensajes;
 
-  // Miembros aceptados
+  /// Miembros aceptados
   List<Map<String, dynamic>> miembrosAceptados = [];
   bool loadingMiembrosAceptados = false;
   String? errorMiembrosAceptados;
@@ -55,7 +55,7 @@ class LaQuedadaProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Listar quedadas donde el usuario es miembro (aceptado o pendiente)
+  /// Listar quedadas donde el usuario es miembro (aceptado o pendiente)
   Future<void> fetchQuedadasPorMiembro(String userId) async {
     loading = true;
     error = null;
@@ -71,14 +71,13 @@ class LaQuedadaProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Obtener solicitudes pendientes para una quedada
+  /// Obtener solicitudes pendientes para una quedada
   Future<void> fetchSolicitudesPendientes(String quedadaId) async {
     loadingSolicitudes = true;
     errorSolicitudes = null;
     notifyListeners();
     try {
       final data = await apiService.getSolicitudesPendientesPorQuedada(quedadaId);
-      // Para cada solicitud, obtener el nombre y apellidos del usuario solicitante
       solicitudesPendientes = await Future.wait(data.map((solicitud) async {
         final userId = solicitud['usuarioSolicitanteId'];
         try {
@@ -97,7 +96,7 @@ class LaQuedadaProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Obtener mensajes del chat de una quedada
+  /// Obtener mensajes del chat de una quedada
   Future<void> fetchMensajesQuedada(String quedadaId) async {
     loadingMensajes = true;
     errorMensajes = null;
@@ -113,7 +112,7 @@ class LaQuedadaProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Enviar mensaje al chat de una quedada
+  /// Enviar mensaje al chat de una quedada
   Future<void> enviarMensajeQuedada(String quedadaId, Map<String, dynamic> mensajeData) async {
     try {
       await apiService.enviarMensajeChatQuedada(quedadaId, mensajeData);
@@ -124,7 +123,7 @@ class LaQuedadaProvider extends ChangeNotifier {
     }
   }
 
-  // Aceptar solicitud
+  /// Aceptar solicitud
   Future<void> aceptarSolicitud(String quedadaId, String userId, String solicitanteId,String solicitudId) async {
     try {
       await apiService.aceptarSolicitudQuedada(quedadaId, userId, solicitanteId);
@@ -132,18 +131,20 @@ class LaQuedadaProvider extends ChangeNotifier {
       solicitudesPendientes.removeWhere((s) => s['usuarioSolicitanteId'] == solicitanteId);
       notifyListeners();
     } catch (e) {
-      // Manejo de error opcional
+      errorSolicitudes = e.toString();
+      notifyListeners();
     }
   }
 
-  // Rechazar solicitud
+  /// Rechazar solicitud
   Future<void> rechazarSolicitud(String solicitudId) async {
     try {
       await apiService.actualizarEstadoSolicitud(solicitudId, "rechazado");
       solicitudesPendientes.removeWhere((s) => s['id'] == solicitudId);
       notifyListeners();
     } catch (e) {
-      // Manejo de error opcional
+      errorSolicitudes = e.toString();
+      notifyListeners();
     }
   }
 
@@ -163,13 +164,13 @@ class LaQuedadaProvider extends ChangeNotifier {
     return "Solicitar unirse";
   }
 
-  // --- NUEVO: Miembros aceptados ---
+  /// Miembros aceptados
   Future<void> fetchMiembrosAceptados(String quedadaId) async {
     loadingMiembrosAceptados = true;
     errorMiembrosAceptados = null;
     notifyListeners();
     try {
-      final List<dynamic> data = await apiService.getMiembrosAceptados(quedadaId); // Array de IDs
+      final List<dynamic> data = await apiService.getMiembrosAceptados(quedadaId);
       miembrosAceptados = await Future.wait(data.map((userId) async {
         try {
           final user = await apiService.getClientUser(userId);
@@ -177,7 +178,7 @@ class LaQuedadaProvider extends ChangeNotifier {
             'usuarioId': userId,
             'nombre': user['nombre'] ?? 'Usuario desconocido',
             'apellidos': user['apellidos'] ?? '',
-            'photo': user['photo'], // Cargar foto también
+            'photo': user['photo'],
           };
         } catch (_) {
           return {
@@ -202,9 +203,9 @@ class LaQuedadaProvider extends ChangeNotifier {
       miembrosAceptados.removeWhere((m) => m['usuarioId'] == usuarioId);
       notifyListeners();
     } catch (e) {
-      // Manejo de error opcional
+      errorMiembrosAceptados = e.toString();
+      notifyListeners();
     }
   }
 
 }
-

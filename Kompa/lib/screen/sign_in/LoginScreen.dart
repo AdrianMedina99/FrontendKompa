@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'package:kompa/config/AppConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -60,9 +58,13 @@ class _WelcomeState extends State<Welcome> {
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      setState(() {
-        _errorMessage = "Por favor, completa todos los campos.";
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Por favor, completa todos los campos."),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       return;
     }
 
@@ -86,8 +88,8 @@ class _WelcomeState extends State<Welcome> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage ?? "Error desconocido."),
+          const SnackBar(
+            content: Text("Credenciales inválidas."),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -95,8 +97,8 @@ class _WelcomeState extends State<Welcome> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error al iniciar sesión: $e"),
+        const SnackBar(
+          content: Text("Credenciales inválidas."),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -437,3 +439,4 @@ class _WelcomeState extends State<Welcome> {
     );
   }
 }
+

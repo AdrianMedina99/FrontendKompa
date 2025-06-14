@@ -237,7 +237,6 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                             _isSubmitting = true;
                           });
                           try {
-                            // Usar hora local en vez de UTC
                             final now = DateTime.now();
                             final formattedDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(now);
                             final valorationData = {

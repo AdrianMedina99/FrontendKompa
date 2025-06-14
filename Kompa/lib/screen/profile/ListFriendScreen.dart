@@ -1,4 +1,3 @@
-// ignore_for_file: non_constant_identifier_names, camel_case_types, file_names
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -46,11 +45,9 @@ class _List_friendState extends State<List_friend> {
 
       if (authProvider.userId == null) return false;
 
-      // Tu tipo de usuario SIEMPRE
       final userType = (authProvider.userType ?? 'client').toLowerCase();
       final collection = userType == 'client' ? 'clientUsers' : 'businessUsers';
 
-      // Tu lista de siguiendo
       final following = await apiService.getFollowing(authProvider.userId!, collection);
       return following.contains(userId);
     } catch (e) {

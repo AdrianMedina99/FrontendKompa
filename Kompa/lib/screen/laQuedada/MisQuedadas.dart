@@ -441,7 +441,6 @@ class _MisQuedadasState extends State<MisQuedadas> {
                         },
                       ),
                       const SizedBox(height: 10),
-                      // MAPA
                       SizedBox(
                         height: 180,
                         child: ClipRRect(

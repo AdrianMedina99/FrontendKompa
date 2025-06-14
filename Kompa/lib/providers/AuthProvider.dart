@@ -1,4 +1,3 @@
-// lib/providers/auth_provider.dart
 import 'dart:convert';
 import 'dart:io';
 
@@ -372,7 +371,6 @@ class AuthProvider with ChangeNotifier {
         return await _apiService.getBusinessUser(_userId!);
       } else if (_userType == 'CLIENT') {
         final clientData = await _apiService.getClientUser(_userId!);
-        // Concatenar nombre y apellidos
         if (clientData.containsKey('nombre') && clientData.containsKey('apellidos')) {
           clientData['nombreCompleto'] = '${clientData['nombre']} ${clientData['apellidos']}';
         }

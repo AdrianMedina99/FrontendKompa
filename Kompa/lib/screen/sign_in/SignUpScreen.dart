@@ -1,4 +1,3 @@
-// ignore_for_file: file_names, camel_case_types
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -609,7 +608,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     ),
                   ),
                   AppConstants.Height(height / 50),
-                  // Ciudad
                   _buildTextField(
                     hintText: "Ciudad",
                     prefixIcon: Icons.location_city_outlined,
@@ -739,7 +737,6 @@ class _Sign_upState extends State<Sign_up> with SingleTickerProviderStateMixin {
                     ),
                   ),
                   AppConstants.Height(height / 50),
-                  // Ciudad
                   _buildTextField(
                     hintText: "Ciudad",
                     prefixIcon: Icons.location_city_outlined,

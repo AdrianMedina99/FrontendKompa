@@ -1,8 +1,6 @@
-// lib/services/shared_preferences_service.dart
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Versión mejorada de SharedPreferencesService
 class SharedPreferencesService {
   static Future<void> saveString(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
